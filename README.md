@@ -63,7 +63,7 @@ VHL_EXPIRATION_DAYS=14
 VHL_PASS_CODE=''
 ```
 
-All other settings are optional. If you want to customize color, icons, locales, etc, please check the details on this [guide](./docs/customize-your-app).
+All other settings are optional. If you want to customize color, icons, locales, etc, please check the details on this [guide](./docs/customize-your-app.md).
 
 ## How to Run the App
 
