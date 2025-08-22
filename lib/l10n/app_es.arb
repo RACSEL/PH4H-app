@@ -80,5 +80,9 @@
   "generateQrCodeButtonLabel": "Generar código QR",
   "loginInvalidCredentials": "Credenciales inválidas",
   "loginVerifyEmail": "Por favor verifica tu correo electrónico",
-  "unexpectedErrorMessage": "Un error inesperado ha ocurrido"
+  "unexpectedErrorMessage": "Un error inesperado ha ocurrido",
+  "cancel": "Cancelar",
+  "save": "Guardar",
+  "invalidQrMessage": "QR inválido. Por favor intente nuevamente.",
+  "ipsLoadErrorMessage": "Error al cargar IPS. Por favor intente nuevamente."
 }

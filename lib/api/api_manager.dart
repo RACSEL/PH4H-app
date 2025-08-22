@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:ips_lacpass_app/api/auth/auth_interceptor.dart';
 import 'package:ips_lacpass_app/constants.dart';
+import 'dart:convert';
 
 class ApiManager {
   static final ApiManager _instance = ApiManager._internal(); //singleton class
@@ -143,10 +144,52 @@ class ApiManager {
           }
         ),
         data: {
-          "content": bundle.toString(),
+          "content": jsonEncode(bundle),
           "expires_on": DateTime.now().add(Duration(days: Constants.vhlExpirationDays)).toIso8601String(),
           "pass_code": Constants.vhlPassCode
         }
+      );
+      return response;
+    } on DioException catch (e) {
+      Stream.error(e);
+      return Future.error(e);
+    }
+  }
+
+  Future<Response> getIpsVhl(String vhlCode) async {
+    try {
+      final Response response = await dio.post(
+          '${Constants.apiEndpoint}/qr/fetch',
+          options: Options(
+              headers: {
+                'Content-Type': 'application/json',
+              }
+          ),
+          data: {
+            "data":vhlCode,
+            "pass_code": Constants.vhlPassCode
+          }
+      );
+      return response;
+    } on DioException catch (e) {
+      Stream.error(e);
+      return Future.error(e);
+    }
+  }
+
+  Future<Response> mergeIps(Map<String, dynamic> currentIps, Map<String, dynamic> newIps) async {
+    try {
+      final Response response = await dio.post(
+          '${Constants.apiEndpoint}/ips/merge',
+          options: Options(
+              headers: {
+                'Content-Type': 'application/json',
+              }
+          ),
+          data: {
+            "current_ips": currentIps,
+            "new_ips": newIps
+          }
       );
       return response;
     } on DioException catch (e) {

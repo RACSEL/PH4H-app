@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ips_lacpass_app/constants.dart';
 import 'package:ips_lacpass_app/l10n/app_localizations.dart';
-
 
 class VerifyAccountScreen extends StatelessWidget {
   const VerifyAccountScreen({super.key});
@@ -25,13 +23,15 @@ class VerifyAccountScreen extends StatelessWidget {
                           AppLocalizations.of(context)!
                               .verifyAccountScreenTitle,
                           style: TextStyle(fontSize: 36)),
-                      SizedBox(height: 40,),
+                      SizedBox(
+                        height: 40,
+                      ),
                       Center(
-                        child: Text(AppLocalizations.of(context)!
-                            .verifyAccountScreenDescription,
-                          style: TextStyle(fontSize: 20),
-                          textAlign: TextAlign.center
-                        ),
+                        child: Text(
+                            AppLocalizations.of(context)!
+                                .verifyAccountScreenDescription,
+                            style: TextStyle(fontSize: 20),
+                            textAlign: TextAlign.center),
                       ),
                       SizedBox(
                         height: 80,
@@ -41,10 +41,13 @@ class VerifyAccountScreen extends StatelessWidget {
                         children: [
                           FilledButton(
                               onPressed: () {
-                                Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+                                Navigator.pushNamedAndRemoveUntil(
+                                    context, '/login', (route) => false);
                               },
-                              child: Text(AppLocalizations.of(context)!.loginButtonLabel,
-                                style: TextStyle(fontSize: 20),)),
+                              child: Text(
+                                AppLocalizations.of(context)!.loginButtonLabel,
+                                style: TextStyle(fontSize: 20),
+                              )),
                         ],
                       )
                     ]))));

@@ -5,15 +5,32 @@ import 'package:ips_lacpass_app/l10n/app_localizations.dart';
 import 'package:ips_lacpass_app/models/ips_model.dart';
 
 class MedicationsCard extends ConsumerWidget {
-  const MedicationsCard({super.key});
+  final IpsSource source;
+
+  const MedicationsCard({super.key, required this.source});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    var medicationList = ref
-        .read(ipsModelProvider.select((ips) => ips.medications))
-        .asMap()
-        .entries;
-    return ExpansionTile(
+    var medicationList;
+
+    switch (source) {
+      case IpsSource.national:
+        medicationList = ref
+            .read(ipsModelProvider.select((ips) => ips.medications))
+            .asMap()
+            .entries;
+        break;
+      case IpsSource.vhl:
+        medicationList = ref
+            .read(ipsVhlModelProvider.select((ips) => ips.medications))
+            .asMap()
+            .entries;
+        break;
+
+    }
+
+    return medicationList.length == 0 ? SizedBox.shrink() :
+    ExpansionTile(
         initiallyExpanded: true,
         title: Row(
           children: [

@@ -295,4 +295,17 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get unexpectedErrorMessage => 'Un error inesperado ha ocurrido';
+
+  @override
+  String get cancel => 'Cancelar';
+
+  @override
+  String get save => 'Guardar';
+
+  @override
+  String get invalidQrMessage => 'QR inválido. Por favor intente nuevamente.';
+
+  @override
+  String get ipsLoadErrorMessage =>
+      'Error al cargar IPS. Por favor intente nuevamente.';
 }

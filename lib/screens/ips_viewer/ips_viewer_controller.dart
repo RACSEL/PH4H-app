@@ -1,8 +1,21 @@
 part of 'ips_viewer_screen.dart';
 
 abstract class IPSViewerController extends ConsumerState<IPSViewerScreen> {
+  late ChangeNotifierProvider<IPSModel> ipsProvider;
+  IpsSource source;
+  String? vhlCode;
   bool _initialized = false;
   bool _loading = true;
+
+  IPSViewerController({required this.source, this.vhlCode}) {
+    switch (source) {
+      case IpsSource.national:
+        ipsProvider = ipsModelProvider;
+        break;
+      case IpsSource.vhl:
+        ipsProvider = ipsVhlModelProvider;
+    }
+  }
 
   @override
   Future<void> didChangeDependencies() async {
@@ -13,7 +26,14 @@ abstract class IPSViewerController extends ConsumerState<IPSViewerScreen> {
 
       if (user != null) {
         try {
-          await ref.read(ipsModelProvider).initState();
+          switch (source) {
+            case IpsSource.national:
+              await ref.read(ipsProvider).initState();
+              break;
+            case IpsSource.vhl:
+              print("Loading VHL state");
+              await ref.read(ipsProvider).initStateWithVhlCode(vhlCode!);
+          }
           _initialized = true;
 
           if (mounted) {
@@ -24,6 +44,7 @@ abstract class IPSViewerController extends ConsumerState<IPSViewerScreen> {
             debugPrint('Error initiallizing IPS: $e');
           }
           if (mounted) {
+            showTopSnackBar(context, AppLocalizations.of(context)!.ipsLoadErrorMessage);
             Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(

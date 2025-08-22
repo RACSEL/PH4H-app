@@ -76,14 +76,12 @@ abstract class AccountSettingsController
       _submitting = true;
     });
     _formKey.currentState!.save();
-    final userId = ref.read(userModelProvider)!.identifier ?? '';
+    final userId = ref.read(userModelProvider)!.identifier;
     if (userId == '') {
       showTopSnackBar(
-          context,
-          AppLocalizations.of(context)!.unexpectedErrorMessage,
+          context, AppLocalizations.of(context)!.unexpectedErrorMessage,
           backgroundColor: Theme.of(context).colorScheme.error,
-          textColor: Theme.of(context).colorScheme.onError
-      );
+          textColor: Theme.of(context).colorScheme.onError);
       setState(() {
         _submitting = false;
       });
@@ -94,17 +92,15 @@ abstract class AccountSettingsController
 
       return;
     }
-    ref.read(authStateProvider.notifier).updateUser(
-        _inputFirstName!,
-        _inputLastName!
-    ).then((_) {
+    ref
+        .read(authStateProvider.notifier)
+        .updateUser(_inputFirstName!, _inputLastName!)
+        .then((_) {
       if (mounted) {
         showTopSnackBar(
-            context,
-            AppLocalizations.of(context)!.userUpdatedMessage,
+            context, AppLocalizations.of(context)!.userUpdatedMessage,
             backgroundColor: Theme.of(context).colorScheme.primary,
-            textColor: Theme.of(context).colorScheme.onPrimary
-        );
+            textColor: Theme.of(context).colorScheme.onPrimary);
         setState(() {
           _inputFirstName = null;
           _inputLastName = null;
@@ -115,11 +111,9 @@ abstract class AccountSettingsController
     }).onError((err, st) {
       if (mounted) {
         showTopSnackBar(
-            context,
-            AppLocalizations.of(context)!.unexpectedErrorMessage,
+            context, AppLocalizations.of(context)!.unexpectedErrorMessage,
             backgroundColor: Theme.of(context).colorScheme.error,
-            textColor: Theme.of(context).colorScheme.onError
-        );
+            textColor: Theme.of(context).colorScheme.onError);
         setState(() {
           _submitting = false;
         });

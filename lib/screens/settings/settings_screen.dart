@@ -42,7 +42,7 @@ class SettingsScreen extends ConsumerWidget {
                     SettingsTile.navigation(
                       title: Text(
                           AppLocalizations.of(context)!.accountSettingsLabel),
-                      enabled: false,
+                      enabled: true,
                       onPressed: (context) {
                         Navigator.push(
                           context,

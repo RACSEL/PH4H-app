@@ -292,4 +292,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unexpectedErrorMessage => 'An unexpected error has occurred';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get invalidQrMessage => 'Invalid QR. Please try again.';
+
+  @override
+  String get ipsLoadErrorMessage => 'Error loading IPS data. Please try again.';
 }

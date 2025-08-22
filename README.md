@@ -56,14 +56,19 @@ KEYCLOAK_CLIENT_ID=''
 # Refresh token key, on keycloak is refresh_token
 KEYCLOAK_REFRESH_TOKEN_KEY=''
 
+# IPS
+# The number of days the user's IPS bundle will be stored in the device storage after fetching it from 
+# the FHIR server
+IPS_EXP_DAYS=6
+
 # VHL
 # The number of days the generated QR code will expire
 VHL_EXPIRATION_DAYS=14
 # In case you want to add a passcode to the generated QR code
-VHL_PASS_CODE=''
+VHL_PASS_CODE='0000'
 ```
 
-All other settings are optional. If you want to customize color, icons, locales, etc, please check the details on this [guide](./docs/customize-your-app).
+All other settings are optional. If you want to customize color, icons, locales, etc, please check the details on this [guide](./docs/customize-your-app.md).
 
 ## How to Run the App
 

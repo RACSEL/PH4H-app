@@ -2,11 +2,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ips_lacpass_app/models/auth_state_notifier.dart';
-import 'package:ips_lacpass_app/widgets/document_type_select.dart';
+import 'package:ips_lacpass_app/widgets/patient_form/document_type_select.dart';
 
-import 'package:ips_lacpass_app/constants.dart';
 import 'package:ips_lacpass_app/l10n/app_localizations.dart';
-import 'package:ips_lacpass_app/models/document_type.dart';
+import 'package:ips_lacpass_app/widgets/patient_form/national_id_input.dart';
 import 'package:ips_lacpass_app/widgets/snackbar.dart';
 
 part 'login_controller.dart';
@@ -57,61 +56,20 @@ class _LoginScreen extends LoginController {
                                     },
                                   ),
                                   SizedBox(height: 23),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: DropdownButtonFormField(
-                                          isExpanded: true,
-                                          decoration: InputDecoration(
-                                            labelText:
-                                                AppLocalizations.of(context)!
-                                                    .countryInputLabel,
-                                            border: OutlineInputBorder(),
-                                          ),
-                                          items: Constants.countryOptions.map(
-                                              (Map<String, String> country) {
-                                            return DropdownMenuItem(
-                                              value: country['value'],
-                                              child: Text(
-                                                country['label']!,
-                                                overflow: TextOverflow.ellipsis,
-                                                softWrap: false,
-                                              ),
-                                            );
-                                          }).toList(),
-                                          onChanged: (String? newValue) {
-                                            setState(() {
-                                              _selectedCountryCode = newValue;
-                                            });
-                                          },
-                                          validator: _countryValidator,
-                                        ),
-                                      ),
-                                      SizedBox(width: 10),
-                                      Expanded(
-                                        child: TextFormField(
-                                          onTapOutside:
-                                              (PointerDownEvent event) {
-                                            FocusManager.instance.primaryFocus
-                                                ?.unfocus();
-                                          },
-                                          enableSuggestions: false,
-                                          autocorrect: false,
-                                          decoration: InputDecoration(
-                                            labelText:
-                                                AppLocalizations.of(context)!
-                                                    .identifierInputLabel,
-                                            border: OutlineInputBorder(),
-                                          ),
-                                          onChanged: (newValue) {
-                                            setState(() {
-                                              _inputId = newValue;
-                                            });
-                                          },
-                                          validator: _inputIdValidator,
-                                        ),
-                                      )
-                                    ],
+                                  NationalIdInput(
+                                    selectedCountryCode: _selectedCountryCode,
+                                    onChangedCountryCode: (value) {
+                                      setState(() {
+                                        _selectedCountryCode = value;
+                                      });
+                                    },
+                                    id: _inputId,
+                                    onChangedId: (value) {
+                                      setState(() {
+                                        _inputId = value;
+                                      });
+                                    },
+                                    selectedDocumentType: _selectedDocumentType,
                                   ),
                                   SizedBox(height: 23),
                                   TextFormField(

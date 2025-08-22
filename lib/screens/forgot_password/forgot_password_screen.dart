@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'package:ips_lacpass_app/constants.dart';
 import 'package:ips_lacpass_app/l10n/app_localizations.dart';
-import 'package:ips_lacpass_app/screens/login/login_screen.dart';
-import 'package:ips_lacpass_app/screens/signup/signup_screen.dart';
 
 part 'forgot_password_controller.dart';
 

@@ -75,7 +75,7 @@ class ShareQrCodeScreen extends ConsumerWidget {
                       onPressed: () {
                         Navigator.of(context).pushAndRemoveUntil(
                           MaterialPageRoute(
-                            builder: (context) => IPSViewerScreen(),
+                            builder: (context) => IPSViewerScreen(source: IpsSource.national),
                           ),
                           (Route<dynamic> route) => false,
                         );

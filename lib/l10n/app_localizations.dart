@@ -589,6 +589,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'An unexpected error has occurred'**
   String get unexpectedErrorMessage;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @invalidQrMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid QR. Please try again.'**
+  String get invalidQrMessage;
+
+  /// No description provided for @ipsLoadErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading IPS data. Please try again.'**
+  String get ipsLoadErrorMessage;
 }
 
 class _AppLocalizationsDelegate

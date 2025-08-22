@@ -12,9 +12,33 @@ class MedicationInfo {
   MedicationStatement? statement;
 
   MedicationInfo({required this.medicationFullUrl, required this.medication, this.statementFullUrl, this.statement});
+
+
+  Map<String, dynamic> toJson() {
+    return {
+      'medicationFullUrl': medicationFullUrl,
+      'medication': medication.toJson(),
+      'statementFullUrl': statementFullUrl,
+      'statement': statement?.toJson(),
+    };
+  }
+
+  MedicationInfo.fromJson(Map<String, dynamic> json)
+      : medicationFullUrl = json['medicationFullUrl'],
+        medication = Medication.fromJson(json['medication']),
+        statementFullUrl = json['statementFullUrl'],
+        statement = json['statement'] != null
+            ? MedicationStatement.fromJson(json['statement'])
+            : null;
+}
+
+enum IpsSource {
+  national,
+  vhl
 }
 
 class IPSModel extends ChangeNotifier {
+  bool isInStorage = false;
   Map<String, dynamic>? bundle;
   Map<String, Condition> conditions = {};
   Map<String, AllergyIntolerance> allergies = {};
@@ -22,11 +46,33 @@ class IPSModel extends ChangeNotifier {
   Map<String, Immunization> immunizations = {};
   String? vhl;
 
+  Future<bool> checkStorage() async {
+    isInStorage = await IPSLoader.instance.isStored();
+    notifyListeners();
+    return isInStorage;
+  }
+
   Future<void> initState() async {
     _cleanState();
-    bundle = await IPSLoader().fetchIPSFromNationalNode();
-    _parseBundle();
+    var ips = await IPSLoader.instance.getStoredIps();
+    if (ips != null) {
+      isInStorage = true;
+      bundle = ips.$1;
+      conditions = ips.$2;
+      allergies = ips.$3;
+      medications = ips.$4;
+      immunizations = ips.$5;
+    } else {
+      bundle = await IPSLoader.instance.fetchIPSFromNationalNode();
+      _parseBundle();
+      await IPSLoader.instance.storeIps(bundle!, conditions, allergies, medications, immunizations);
+      isInStorage = true;
+    }
     notifyListeners();
+  }
+
+  Future<void> initStateWithVhlCode(String vhlCode) async {
+    throw Exception("IpsModel cannot be initialized with VhlCode. Use initState instead.");
   }
 
   void _cleanState() {
@@ -35,6 +81,7 @@ class IPSModel extends ChangeNotifier {
     allergies.clear();
     medications.clear();
     immunizations.clear();
+    isInStorage=false;
   }
 
   void _parseBundle() {
@@ -116,11 +163,56 @@ class IPSModel extends ChangeNotifier {
     }
   }
 
-  void clearVhl() async {
+  void clearVhl() {
    vhl = null;
+  }
+
+  Future<void> clear() async {
+    vhl = null;
+    bundle = null;
+    conditions.clear();
+    allergies.clear();
+    medications.clear();
+    immunizations.clear();
+    await IPSLoader.instance.clearStoredIps();
+    isInStorage = false;
+  }
+
+  Future<void> merge(Map<String, dynamic>? newIps) async {
+    if (newIps != null) {
+      final newBundleResp = await ApiManager.instance.mergeIps(bundle!, newIps);
+      _cleanState();
+      bundle = newBundleResp.data;
+      _parseBundle();
+      await IPSLoader.instance.storeIps(bundle!, conditions, allergies, medications, immunizations);
+      isInStorage = true;
+      notifyListeners();
+    } else {
+      throw Exception("newIps cannot be null");
+    }
   }
 }
 
 final ipsModelProvider = ChangeNotifierProvider<IPSModel>((ref) {
   return IPSModel();
+});
+
+class IpsVhlModel extends IPSModel {
+
+  @override
+  Future<void> initState() async {
+    throw Exception("IpsVhlModel cannot be initialized directly. Use initStateWithVhlCode instead.");
+  }
+
+  @override
+  Future<void> initStateWithVhlCode(String vhlCode) async {
+    _cleanState();
+    bundle = await IPSLoader.instance.fetchIPSWithVhlFromNationalNode(vhlCode);
+    _parseBundle();
+    notifyListeners();
+  }
+}
+
+final ipsVhlModelProvider = ChangeNotifierProvider<IpsVhlModel>((ref) {
+  return IpsVhlModel();
 });

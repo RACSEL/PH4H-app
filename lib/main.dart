@@ -5,11 +5,13 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:ips_lacpass_app/l10n/app_localizations.dart';
 import 'package:ips_lacpass_app/l10n/locale_provider.dart';
+import 'package:ips_lacpass_app/models/ips_model.dart';
 import 'package:ips_lacpass_app/screens/forgot_password/forgot_password_screen.dart';
 import 'package:ips_lacpass_app/screens/home/home_screen.dart';
 import 'package:ips_lacpass_app/screens/ips_viewer/ips_viewer_screen.dart';
 import 'package:ips_lacpass_app/screens/landing/landing_screen.dart';
 import 'package:ips_lacpass_app/screens/login/login_screen.dart';
+import 'package:ips_lacpass_app/screens/scan_qr/camera_scanner_screen.dart';
 import 'package:ips_lacpass_app/screens/signup/signup_screen.dart';
 import 'package:ips_lacpass_app/screens/verify_account/verify_account_screen.dart';
 
@@ -21,6 +23,9 @@ import 'package:ips_lacpass_app/widgets/landing_auth_checker_widget.dart';
 void main() async {
   await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -52,7 +57,8 @@ class App extends ConsumerWidget {
           '/forgot-password': (context) => ForgotPasswordScreen(),
           '/verify-account': (context) => VerifyAccountScreen(),
           '/home': (context) => AuthCheckerWidget(child: HomeScreen()),
-          '/ips': (context) => AuthCheckerWidget(child: IPSViewerScreen()),
+          '/ips': (context) => AuthCheckerWidget(child: IPSViewerScreen(source: IpsSource.national)),
+          '/scan-qr': (context) => AuthCheckerWidget(child: CameraScannerScreen()),
         });
   }
 }

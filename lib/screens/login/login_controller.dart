@@ -4,6 +4,8 @@ abstract class LoginController extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   String? _selectedDocumentType;
   String? _inputPassword;
+  String? _selectedCountryCode;
+  String? _inputId;
   late TextEditingController _passwordController;
 
   bool _submitting = false;
@@ -14,45 +16,14 @@ abstract class LoginController extends ConsumerState<LoginScreen> {
       _selectedDocumentType != null &&
       _selectedCountryCode != null;
 
-  String? _inputId;
-  late TextEditingController _idController;
-  String? _inputIdValidator(String? value) {
-    if (value == null || value.isEmpty) {
-      return AppLocalizations.of(context)!.emptyIdentifierValidation;
-    }
-    if (_selectedDocumentType == DocumentType.dni.value) {
-      if (!Constants.dniRegex.hasMatch(value)) {
-        return AppLocalizations.of(context)!.invalidIdentifierFormatValidation;
-      }
-    } else if (_selectedDocumentType == DocumentType.passport.value) {
-      if (!Constants.passportRegex.hasMatch(value)) {
-        return AppLocalizations.of(context)!.invalidPassportFormatValidation;
-      }
-    }
-    return null;
-  }
-
-  String? _selectedCountryCode;
-  String? _countryValidator(String? value) {
-    if (value == null || value.isEmpty) {
-      return AppLocalizations.of(context)!.emptyCountryValidation;
-    }
-    if (!Constants.countryOptions.any((country) => country['value'] == value)) {
-      return AppLocalizations.of(context)!.invalidCountryValidation;
-    }
-    return null;
-  }
-
   @override
   void initState() {
     super.initState();
-    _idController = TextEditingController();
     _passwordController = TextEditingController();
   }
 
   @override
   void dispose() {
-    _idController.dispose();
     _passwordController.dispose();
     super.dispose();
   }

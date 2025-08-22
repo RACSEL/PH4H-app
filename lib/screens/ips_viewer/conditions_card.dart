@@ -5,15 +5,30 @@ import 'package:ips_lacpass_app/l10n/app_localizations.dart';
 import 'package:ips_lacpass_app/models/ips_model.dart';
 
 class ConditionsCard extends ConsumerWidget {
-  const ConditionsCard({super.key});
+  final IpsSource source;
+
+  const ConditionsCard({super.key, required this.source});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    var conditionList = ref
-        .read(ipsModelProvider.select((ips) => ips.conditions))
-        .entries;
+    var conditionList;
 
-    return ExpansionTile(
+    switch (source) {
+      case IpsSource.national:
+        conditionList = ref
+            .read(ipsModelProvider.select((ips) => ips.conditions))
+            .entries;
+        break;
+      case IpsSource.vhl:
+        conditionList = ref
+            .read(ipsVhlModelProvider.select((ips) => ips.conditions))
+            .entries;
+        break;
+
+    }
+
+    return conditionList.length == 0 ? SizedBox.shrink() :
+      ExpansionTile(
         initiallyExpanded: true,
         title: Row(
           children: [

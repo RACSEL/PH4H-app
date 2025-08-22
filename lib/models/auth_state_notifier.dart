@@ -3,10 +3,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ips_lacpass_app/api/api_manager.dart';
 import 'package:ips_lacpass_app/api/auth/token_manager.dart';
-import 'package:ips_lacpass_app/models/user_model.dart';
+import 'package:ips_lacpass_app/api/ips_loader.dart';
+import 'package:ips_lacpass_app/models/ips_model.dart';
 
 //Notifier to link the change in Auth Token update with the state of UserModel.
-class AuthStateNotifier extends StateNotifier<AsyncValue<String?>> {
+class AuthStateNotifier extends StateNotifier<AsyncValue<(String?, bool)>> {
   final Ref _ref;
 
   AuthStateNotifier(this._ref) : super(const AsyncValue.loading()) {
@@ -21,8 +22,9 @@ class AuthStateNotifier extends StateNotifier<AsyncValue<String?>> {
       so we try to update it with the refresh token if this is stored.
        */
       token = await _ref.read(tokenManagerProvider).updateAccessToken();
+      final isStored = await IPSLoader.instance.isStored();
       if (mounted) {
-        state = AsyncValue.data(token);
+        state = AsyncValue.data((token, isStored));
       }
     } catch (e, st) {
       if (mounted) {
@@ -33,9 +35,11 @@ class AuthStateNotifier extends StateNotifier<AsyncValue<String?>> {
 
   Future<void> login(String username, String password) async {
     final response = await ApiManager.instance.login(username, password);
-    await _ref.read(tokenManagerProvider).setTokens(response.data['access_token'],
-        refreshToken: response.data['refresh_token'], saveRefreshToken: true);
-    state = AsyncValue.data(response.data['access_token']);
+    await _ref.read(tokenManagerProvider).setTokens(
+        response.data['access_token'],
+        refreshToken: response.data['refresh_token'],
+        saveRefreshToken: true);
+    state = AsyncValue.data((response.data['access_token'], false));
   }
 
   Future<void> logout() async {
@@ -44,8 +48,9 @@ class AuthStateNotifier extends StateNotifier<AsyncValue<String?>> {
     if (mounted && refreshToken != null && refreshToken.isNotEmpty) {
       await ApiManager.instance.logout(refreshToken);
       await _ref.read(tokenManagerProvider).clearTokens();
+      await _ref.read(ipsModelProvider).clear();
       if (mounted) {
-        state = const AsyncValue.data(null);
+        state = const AsyncValue.data((null, false));
       }
     }
   }
@@ -74,10 +79,7 @@ class AuthStateNotifier extends StateNotifier<AsyncValue<String?>> {
 
   Future<void> updateUser(String firstName, String lastName) async {
     try {
-      await ApiManager.instance.updateUser(
-          firstName,
-          lastName
-      );
+      await ApiManager.instance.updateUser(firstName, lastName);
       _setToken();
     } on DioException catch (err, st) {
       if (kDebugMode) {
@@ -90,6 +92,6 @@ class AuthStateNotifier extends StateNotifier<AsyncValue<String?>> {
 }
 
 final authStateProvider =
-    StateNotifierProvider<AuthStateNotifier, AsyncValue<String?>>((ref) {
+    StateNotifierProvider<AuthStateNotifier, AsyncValue<(String?, bool)>>((ref) {
   return AuthStateNotifier(ref);
 });

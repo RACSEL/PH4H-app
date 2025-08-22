@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:ips_lacpass_app/models/ips_model.dart';
 import 'package:ips_lacpass_app/screens/ips_viewer/ips_viewer_screen.dart';
 import 'package:ips_lacpass_app/l10n/app_localizations.dart';
 import 'package:ips_lacpass_app/widgets/patient_appbar/patient_appbar_widget.dart';
+import 'package:ips_lacpass_app/widgets/qr_scanner_button.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -34,18 +36,13 @@ class HomeScreen extends StatelessWidget {
                           Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => IPSViewerScreen(),
+                                builder: (context) => IPSViewerScreen(source: IpsSource.national),
                               ));
                         },
                         child: Text(
                             AppLocalizations.of(context)!.loadDataButtonLabel)),
                     SizedBox(height: 48),
-                    FilledButton(
-                        onPressed: () {
-                          print('Scan QR Code');
-                        }, //TODO: link to backend call
-                        child: Text(AppLocalizations.of(context)!
-                            .scanQRCodeButtonLabel))
+                    QRScannerButton()
                   ]),
             )));
   }

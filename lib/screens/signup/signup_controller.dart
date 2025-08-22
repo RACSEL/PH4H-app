@@ -3,6 +3,7 @@ part of 'signup_screen.dart';
 abstract class SignupController extends ConsumerState<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
   String? _selectedDocumentType;
+  String? _inputId;
 
   bool _submitting = false;
 
@@ -16,24 +17,6 @@ abstract class SignupController extends ConsumerState<SignupScreen> {
       _inputLastName != null &&
       _acceptTerms == true &&
       _inputEmail != null;
-
-  String? _inputId;
-  late TextEditingController _idController;
-  String? _inputIdValidator(String? value) {
-    if (value == null || value.isEmpty) {
-      return AppLocalizations.of(context)!.emptyIdentifierValidation;
-    }
-    if (_selectedDocumentType == DocumentType.dni.value) {
-      if (!Constants.dniRegex.hasMatch(value)) {
-        return AppLocalizations.of(context)!.invalidIdentifierFormatValidation;
-      }
-    } else if (_selectedDocumentType == DocumentType.passport.value) {
-      if (!Constants.passportRegex.hasMatch(value)) {
-        return AppLocalizations.of(context)!.invalidPassportFormatValidation;
-      }
-    }
-    return null;
-  }
 
   String? _inputFirstName;
   late TextEditingController _firstNameController;
@@ -90,15 +73,6 @@ abstract class SignupController extends ConsumerState<SignupScreen> {
   }
 
   String? _selectedCountryCode;
-  String? _countryValidator(String? value) {
-    if (value == null || value.isEmpty) {
-      return AppLocalizations.of(context)!.emptyCountryValidation;
-    }
-    if (!Constants.countryOptions.any((country) => country['value'] == value)) {
-      return AppLocalizations.of(context)!.invalidCountryValidation;
-    }
-    return null;
-  }
 
   bool _acceptTerms = false;
   String? _termsValidator(bool? value) {
@@ -111,7 +85,6 @@ abstract class SignupController extends ConsumerState<SignupScreen> {
   @override
   void initState() {
     super.initState();
-    _idController = TextEditingController();
     _passwordController = TextEditingController();
     _repeatPasswordController = TextEditingController();
     _firstNameController = TextEditingController();
@@ -121,7 +94,6 @@ abstract class SignupController extends ConsumerState<SignupScreen> {
 
   @override
   void dispose() {
-    _idController.dispose();
     _passwordController.dispose();
     _repeatPasswordController.dispose();
     _firstNameController.dispose();
@@ -135,35 +107,30 @@ abstract class SignupController extends ConsumerState<SignupScreen> {
       _submitting = true;
     });
     _formKey.currentState!.save();
-      ref.read(authStateProvider.notifier).register(
-          _inputId!,
-          _inputEmail!,
-          _inputFirstName!,
-          _inputLastName!,
-          _inputPassword!,
-          _inputRepeatPassword!,
-          ref.read(localeProvider).toString(),
-          _selectedDocumentType!
-      ).then((_) {
-        if (mounted) {
-          Navigator.pushNamed(context, '/verify-account');
-        }
-      }).onError((err, st) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text('An unexpected error has occurred',
-                  style: TextStyle(color: Theme
-                      .of(context)
-                      .colorScheme
-                      .onError)),
-              duration: const Duration(seconds: 2),
-              backgroundColor: Theme
-                  .of(context)
-                  .colorScheme
-                  .error
-          ));
-        }
-      });
+    ref
+        .read(authStateProvider.notifier)
+        .register(
+            _inputId!,
+            _inputEmail!,
+            _inputFirstName!,
+            _inputLastName!,
+            _inputPassword!,
+            _inputRepeatPassword!,
+            ref.read(localeProvider).toString(),
+            _selectedDocumentType!)
+        .then((_) {
+      if (mounted) {
+        Navigator.pushNamed(context, '/verify-account');
+      }
+    }).onError((err, st) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('An unexpected error has occurred',
+                style: TextStyle(color: Theme.of(context).colorScheme.onError)),
+            duration: const Duration(seconds: 2),
+            backgroundColor: Theme.of(context).colorScheme.error));
+      }
+    });
     setState(() {
       _submitting = false;
     });

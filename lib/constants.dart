@@ -43,6 +43,9 @@ class Constants {
   static final String keycloakRefreshTokenKey =
       dotenv.env['KEYCLOAK_REFRESH_TOKEN_KEY']!;
 
+  //IPS
+  static final int ipsExpirationDays = int.parse(dotenv.env['IPS_EXP_DAYS']!);
+
   //VHL
   static final int vhlExpirationDays =
       int.parse(dotenv.env['VHL_EXPIRATION_DAYS']!);

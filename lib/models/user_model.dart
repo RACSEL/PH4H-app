@@ -9,15 +9,18 @@ class User {
   String lastName;
   final String email;
 
-  User({required this.identifier, required this.firstName, required this.lastName, required this.email});
+  User(
+      {required this.identifier,
+      required this.firstName,
+      required this.lastName,
+      required this.email});
 
   factory User.fromClaims(Map<String, dynamic> claims) {
     return User(
-      identifier: claims['preferred_username'] ?? '',
-      firstName: claims['given_name'] ?? '',
-      lastName: claims['family_name'] ?? '',
-      email: claims['email'] ?? ''
-    );
+        identifier: claims['preferred_username'] ?? '',
+        firstName: claims['given_name'] ?? '',
+        lastName: claims['family_name'] ?? '',
+        email: claims['email'] ?? '');
   }
 
   @override
@@ -39,16 +42,17 @@ final userModelProvider = Provider<User?>((ref) {
   final authState = ref.watch(authStateProvider);
 
   return authState.maybeWhen(
-    data: (accessToken) {
+      data: (data) {
+        final accessToken = data.$1;
         if (accessToken != null && accessToken.isNotEmpty) {
           try {
             if (Jwt.isExpired(accessToken)) {
               Future(() => ref.read(tokenManagerProvider).updateAccessToken());
               return null;
             }
-            Map<String, dynamic> decodedToken = Jwt.parseJwt(accessToken!);
+            Map<String, dynamic> decodedToken = Jwt.parseJwt(accessToken);
             return User.fromClaims(decodedToken);
-          } catch(e) {
+          } catch (e) {
             //TODO: handle refresh error
             print('Error refresh');
             return null;
@@ -56,15 +60,13 @@ final userModelProvider = Provider<User?>((ref) {
         }
         return null;
       },
-      orElse: () => null
-  );
+      orElse: () => null);
 });
 
 final isLoggedInProvider = Provider<bool>((ref) {
   final authState = ref.watch(authStateProvider);
   return authState.maybeWhen(
-    data: (accessToken) => accessToken != null && accessToken.isNotEmpty,
-    error: (err, stack) => false,
-    orElse: () => false
-  );
+      data: (data) => data.$1 != null && data.$1!.isNotEmpty,
+      error: (err, stack) => false,
+      orElse: () => false);
 });
