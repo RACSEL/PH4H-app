@@ -52,8 +52,12 @@
   "conditionStatusInactive": "Inactive",
   "conditionEncounterDiagnosis": "Encounter Diagnosis",
   "immunizationSectionTitle": "{count, plural, =1{Immunization} other{Immunizations}}",
+  "proceduresSectionTitle": "{count, plural, =1{Procedure} other{Procedures}}",
+  "procedurePerformedDate": "Date",
   "loadingIPSDataTitle": "Loading IPS Data",
+  "updatingIpsDataTitle": "Updating IPS Data",
   "loadingVHLDataTitle": "Loading QR",
+  "loadingICVPTitle": "Loading vaccine QR",
   "shareDataButtonLabel": "Share",
   "medicationsSectionTitle": "{count, plural, =1{Medication} other{Medications}}",
   "emptyRepeatPasswordValidation": "Please confirm your password",
@@ -73,6 +77,7 @@
   "updateButtonLabel": "Update",
   "userUpdatedMessage": "User updated",
   "shareQrCodeScreenTitle": "QR Code Generated",
+  "shareIcvpQrCodeScreenTitle": "ICVP QR",
   "shareQrCodeDescription": "Share this QR code with your physician or health care provider.",
   "shareQrCodeBackToHomeButtonLabel": "Back to Home",
   "resourceSelectionTitle": "Information Shared",
@@ -84,5 +89,7 @@
   "cancel": "Cancel",
   "save": "Save",
   "invalidQrMessage": "Invalid QR. Please try again.",
-  "ipsLoadErrorMessage": "Error loading IPS data. Please try again."
+  "ipsLoadErrorMessage": "Error loading IPS data. Please try again.",
+  "recoverPasswordSent": "Recover password email sent",
+  "addToWalletLabel": "Add to Wallet"
 }

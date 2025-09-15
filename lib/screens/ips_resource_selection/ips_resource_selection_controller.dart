@@ -6,6 +6,7 @@ abstract class IPSResourceSelectionController
   final Set<String> _selectedAllergyIndex = {};
   final Set<int> _selectedMedicationIndex = {};
   final Set<String> _selectedImmunizationIndex = {};
+  final Set<String> _selectedProceduresIndex = {};
 
   @override
   void initState() {
@@ -50,6 +51,15 @@ abstract class IPSResourceSelectionController
                 _selectedImmunizationIndex.contains(immunizationEntry.key))
             .map((entry) => entry.key)
             .toList();
+    final filteredProceduresIds = _selectedProceduresIndex.isEmpty
+        ? []
+        : ref
+        .read(ipsModelProvider.select((ips) => ips.procedures))
+        .entries
+        .where((procedureEntry) =>
+        _selectedProceduresIndex.contains(procedureEntry.key))
+        .map((entry) => entry.key)
+        .toList();
     final selectedUrls = <String>[
       ...filteredConditionsIds,
       ...filteredAllergiesIds,
@@ -64,7 +74,8 @@ abstract class IPSResourceSelectionController
           medInfo.medicationFullUrl
         ];
       }),
-      ...filteredImmunizationsIds
+      ...filteredImmunizationsIds,
+      ...filteredProceduresIds
     ];
     // print('Filtered IPS:');
     final filteredIPS = IPSUtils.filterIPS(

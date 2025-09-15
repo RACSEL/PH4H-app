@@ -10,10 +10,11 @@ import 'package:ips_lacpass_app/models/ips_model.dart';
 import 'package:ips_lacpass_app/models/user_model.dart';
 import 'package:ips_lacpass_app/screens/ips_viewer/immunizations_card.dart';
 import 'package:ips_lacpass_app/screens/ips_viewer/medications_card.dart';
-import 'package:ips_lacpass_app/screens/scan_qr/camera_scanner_screen.dart';
+import 'package:ips_lacpass_app/screens/ips_viewer/procedures_card.dart';
 import 'package:ips_lacpass_app/widgets/patient_appbar/patient_appbar_widget.dart';
 import 'package:ips_lacpass_app/widgets/qr_scanner_button.dart';
 import 'package:ips_lacpass_app/widgets/snackbar.dart';
+import 'package:ips_lacpass_app/widgets/update_ips_spinner.dart';
 
 part 'ips_viewer_controller.dart';
 
@@ -24,17 +25,20 @@ class IPSViewerScreen extends ConsumerStatefulWidget {
   const IPSViewerScreen({super.key, required this.source, this.vhlCode});
 
   @override
-  ConsumerState<IPSViewerScreen> createState() => _IPSViewerScreen(source, vhlCode);
+  ConsumerState<IPSViewerScreen> createState() =>
+      _IPSViewerScreen(source, vhlCode);
 }
 
 class _IPSViewerScreen extends IPSViewerController {
-  _IPSViewerScreen(IpsSource source, String? vhlCode) : super(source: source, vhlCode: vhlCode);
+  _IPSViewerScreen(IpsSource source, String? vhlCode)
+      : super(source: source, vhlCode: vhlCode);
 
   @override
   Widget build(BuildContext context) {
     switch (source) {
       case IpsSource.national:
-        ref.listen(ipsModelProvider.select((ips) => ips.bundle), (previous, next) {
+        ref.listen(ipsModelProvider.select((ips) => ips.bundle),
+            (previous, next) {
           if (next != null) {
             setState(() {
               _loading = false;
@@ -43,7 +47,8 @@ class _IPSViewerScreen extends IPSViewerController {
         });
         break;
       case IpsSource.vhl:
-        ref.listen(ipsVhlModelProvider.select((ips) => ips.bundle), (previous, next) {
+        ref.listen(ipsVhlModelProvider.select((ips) => ips.bundle),
+            (previous, next) {
           if (next != null) {
             setState(() {
               _loading = false;
@@ -95,54 +100,48 @@ class _IPSViewerScreen extends IPSViewerController {
                                         SizedBox(height: 23),
                                         MedicationsCard(source: source),
                                         SizedBox(height: 23),
-                                        ImmunizationsCard(source: source)
+                                        ImmunizationsCard(source: source),
+                                        SizedBox(height: 23),
+                                        ProceduresCard(source: source)
                                       ]))
                             ])),
                             SizedBox(height: 15),
-                            source == IpsSource.national  ?
-                            FilledButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              IPSResourceSelectionScreen()));
-                                },
-                                child: Text(AppLocalizations.of(context)!
-                                    .shareDataButtonLabel))
-                          : FilledButton(
-                                onPressed: () {
-                                  ref.read(ipsModelProvider).merge(ref.read(ipsVhlModelProvider).bundle)
-                                  .then((resp) {
-                                    if (mounted) {
-                                      Navigator.pushReplacementNamed(
+                            source == IpsSource.national
+                                ? FilledButton(
+                                    onPressed: () {
+                                      Navigator.push(
                                           context,
-                                          "/ips"
-                                      );
-                                    }
-                                  })
-                                  .onError((error, stackTrace) {
-                                    if (mounted) {
-                                      showTopSnackBar(context, AppLocalizations.of(context)!.unexpectedErrorMessage);
-                                    }
-                                  })
-                                  ;
-                                },
-                                child: Text(AppLocalizations.of(context)!
-                                    .save)),
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  IPSResourceSelectionScreen()));
+                                    },
+                                    child: Text(AppLocalizations.of(context)!
+                                        .shareDataButtonLabel))
+                                : FilledButton(
+                                    onPressed: () {
+                                      if (mounted) {
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  UpdateIpsSpinner(),
+                                            ));
+                                      }
+                                    },
+                                    child: Text(
+                                        AppLocalizations.of(context)!.save)),
                             SizedBox(height: 5),
-                            source == IpsSource.national ? QRScannerButton()
+                            source == IpsSource.national
+                                ? QRScannerButton()
                                 : OutlinedButton(
-                                  onPressed: () {
-                                    Navigator.pushNamedAndRemoveUntil(
-                                        context,
-                                        '/home',
-                                        (Route<dynamic> route) => false
-                                    );
-                                },
-                                child: Text(AppLocalizations.of(context)!
-                                    .cancel))
-
+                                    onPressed: () {
+                                      Navigator.pushNamedAndRemoveUntil(
+                                          context,
+                                          '/home',
+                                          (Route<dynamic> route) => false);
+                                    },
+                                    child: Text(
+                                        AppLocalizations.of(context)!.cancel))
                           ]))));
   }
 }

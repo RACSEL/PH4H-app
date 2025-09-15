@@ -7,7 +7,6 @@ import 'package:ips_lacpass_app/constants.dart';
 import 'package:ips_lacpass_app/models/ips_model.dart';
 
 class IPSLoader {
-
   static final IPSLoader _instance = IPSLoader._internal(); //singleton class
 
   late FlutterSecureStorage _secureStorage;
@@ -25,14 +24,18 @@ class IPSLoader {
       Map<String, Condition> conditions,
       Map<String, AllergyIntolerance> allergies,
       List<MedicationInfo> medications,
-      Map<String, Immunization> immunizations) async {
+      Map<String, ImmunizationWithSource> immunizations,
+      Map<String, Procedure> procedures) async {
     final Map<String, dynamic> ipsPayload = {
       'ips': ips,
       'conditions': conditions,
       'allergies': allergies,
       'medications': medications,
       'immunizations': immunizations,
-      'exp': DateTime.now().add(Duration(days: Constants.ipsExpirationDays)).millisecondsSinceEpoch
+      'procedures': procedures,
+      'exp': DateTime.now()
+          .add(Duration(days: Constants.ipsExpirationDays))
+          .millisecondsSinceEpoch
     };
     await _secureStorage.write(key: 'ips', value: jsonEncode(ipsPayload));
   }
@@ -40,7 +43,7 @@ class IPSLoader {
   Future<bool> isStored() async {
     final ipsStorage = await _secureStorage.read(key: 'ips');
     if (ipsStorage != null) {
-      final Map<String, dynamic>  ipsPayload = jsonDecode(ipsStorage);
+      final Map<String, dynamic> ipsPayload = jsonDecode(ipsStorage);
       if (DateTime.now().millisecondsSinceEpoch < ipsPayload['exp']) {
         return true;
       } else {
@@ -50,23 +53,40 @@ class IPSLoader {
     return false;
   }
 
-  Future<(Map<String, dynamic>, Map<String, Condition>, Map<String, AllergyIntolerance>, List<MedicationInfo>, Map<String, Immunization>)?> getStoredIps() async {
+  Future<
+      (
+        Map<String, dynamic>,
+        Map<String, Condition>,
+        Map<String, AllergyIntolerance>,
+        List<MedicationInfo>,
+        Map<String, ImmunizationWithSource>,
+        Map<String, Procedure>
+      )?> getStoredIps() async {
     try {
       final ipsStorage = await _secureStorage.read(key: 'ips');
       if (ipsStorage != null) {
-        final Map<String, dynamic>  ipsPayload = jsonDecode(ipsStorage);
+        final Map<String, dynamic> ipsPayload = jsonDecode(ipsStorage);
         if (DateTime.now().millisecondsSinceEpoch < ipsPayload['exp']) {
           final Map<String, dynamic> conditionsRaw = ipsPayload['conditions'];
           final Map<String, dynamic> allergiesRaw = ipsPayload['allergies'];
           final List<dynamic> medicationsRaw = ipsPayload['medications'];
-          final Map<String, dynamic> immunizationsRaw = ipsPayload['immunizations'];
+          final Map<String, dynamic> proceduresRaw = ipsPayload['procedures'];
+          final Map<String, dynamic> immunizationsRaw =
+              ipsPayload['immunizations'];
 
           return (
-              ipsPayload['ips'] as Map<String, dynamic>,
-              conditionsRaw.map((key, value) => MapEntry(key, Condition.fromJson(value))),
-              allergiesRaw.map((key, value) => MapEntry(key, AllergyIntolerance.fromJson(value))),
-              medicationsRaw.map((item) => MedicationInfo.fromJson(item)).toList(),
-              immunizationsRaw.map((key, value) => MapEntry(key, Immunization.fromJson(value)))
+            ipsPayload['ips'] as Map<String, dynamic>,
+            conditionsRaw
+                .map((key, value) => MapEntry(key, Condition.fromJson(value))),
+            allergiesRaw.map((key, value) =>
+                MapEntry(key, AllergyIntolerance.fromJson(value))),
+            medicationsRaw
+                .map((item) => MedicationInfo.fromJson(item))
+                .toList(),
+            immunizationsRaw.map((key, value) =>
+                MapEntry(key, ImmunizationWithSource.fromJson(value))),
+            proceduresRaw
+                .map((key, value) => MapEntry(key, Procedure.fromJson(value))),
           );
         } else {
           await _secureStorage.delete(key: 'ips');
@@ -79,9 +99,8 @@ class IPSLoader {
     }
   }
 
-
   Future<Map<String, dynamic>> fetchIPSFromNationalNode() async {
-    Map<String,dynamic>? ips;
+    Map<String, dynamic>? ips;
     try {
       final ipsData = await ApiManager.instance.getIps();
       ips = ipsData.data as Map<String, dynamic>?;
@@ -98,7 +117,8 @@ class IPSLoader {
     await _secureStorage.delete(key: 'ips');
   }
 
-  Future<Map<String, dynamic>> fetchIPSWithVhlFromNationalNode(String vhlCode) async {
+  Future<Map<String, dynamic>> fetchIPSWithVhlFromNationalNode(
+      String vhlCode) async {
     final ipsData = await ApiManager.instance.getIpsVhl(vhlCode);
 
     return ipsData.data as Map<String, dynamic>;

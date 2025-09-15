@@ -4,7 +4,6 @@ abstract class IPSViewerController extends ConsumerState<IPSViewerScreen> {
   late ChangeNotifierProvider<IPSModel> ipsProvider;
   IpsSource source;
   String? vhlCode;
-  bool _initialized = false;
   bool _loading = true;
 
   IPSViewerController({required this.source, this.vhlCode}) {
@@ -18,42 +17,55 @@ abstract class IPSViewerController extends ConsumerState<IPSViewerScreen> {
   }
 
   @override
-  Future<void> didChangeDependencies() async {
-    super.didChangeDependencies();
-
-    if (!_initialized) {
-      final user = ref.read(userModelProvider);
-
-      if (user != null) {
-        try {
-          switch (source) {
-            case IpsSource.national:
-              await ref.read(ipsProvider).initState();
-              break;
-            case IpsSource.vhl:
-              print("Loading VHL state");
-              await ref.read(ipsProvider).initStateWithVhlCode(vhlCode!);
-          }
-          _initialized = true;
-
-          if (mounted) {
-            Navigator.of(context).popUntil((route) => route.isFirst);
-          }
-        } catch (e) {
-          if (kDebugMode) {
-            debugPrint('Error initiallizing IPS: $e');
-          }
-          if (mounted) {
-            showTopSnackBar(context, AppLocalizations.of(context)!.ipsLoadErrorMessage);
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => HomeScreen(),
-                ));
-          }
-        } finally {
-          _loading = false;
-        }
+  void initState() {
+    super.initState();
+    final user = ref.read(userModelProvider);
+    if (user != null) {
+      switch (source) {
+        case IpsSource.national:
+          ref.read(ipsProvider).initState().then((resp) {
+            if (mounted) {
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            }
+            _loading = false;
+          }).onError((error, stackTrace) {
+            debugPrint('Error initiallizing IPS: $error');
+            if (mounted) {
+              showTopSnackBar(
+                  context, AppLocalizations.of(context)!.ipsLoadErrorMessage);
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => HomeScreen(),
+                  ));
+            }
+          });
+          break;
+        case IpsSource.vhl:
+          ref.read(ipsProvider).initStateWithVhlCode(vhlCode!).then((resp) {
+            if (mounted) {
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            }
+            _loading = false;
+          }).onError((error, stackTrace) {
+            if (kDebugMode) {
+              debugPrint('Error initiallizing IPS: $error');
+            }
+            if (mounted) {
+              showTopSnackBar(
+                  context, AppLocalizations.of(context)!.ipsLoadErrorMessage);
+              if (ref.read(ipsModelProvider).bundle == null) {
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => HomeScreen(),
+                    ));
+              } else {
+                Navigator.pushNamedAndRemoveUntil(
+                    context, '/ips', (Route<dynamic> route) => false);
+              }
+            }
+          });
       }
     }
   }

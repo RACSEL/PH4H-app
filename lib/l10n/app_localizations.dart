@@ -416,17 +416,41 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{Immunization} other{Immunizations}}'**
   String immunizationSectionTitle(num count);
 
+  /// No description provided for @proceduresSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Procedure} other{Procedures}}'**
+  String proceduresSectionTitle(num count);
+
+  /// No description provided for @procedurePerformedDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get procedurePerformedDate;
+
   /// No description provided for @loadingIPSDataTitle.
   ///
   /// In en, this message translates to:
   /// **'Loading IPS Data'**
   String get loadingIPSDataTitle;
 
+  /// No description provided for @updatingIpsDataTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Updating IPS Data'**
+  String get updatingIpsDataTitle;
+
   /// No description provided for @loadingVHLDataTitle.
   ///
   /// In en, this message translates to:
   /// **'Loading QR'**
   String get loadingVHLDataTitle;
+
+  /// No description provided for @loadingICVPTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading vaccine QR'**
+  String get loadingICVPTitle;
 
   /// No description provided for @shareDataButtonLabel.
   ///
@@ -542,6 +566,12 @@ abstract class AppLocalizations {
   /// **'QR Code Generated'**
   String get shareQrCodeScreenTitle;
 
+  /// No description provided for @shareIcvpQrCodeScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'ICVP QR'**
+  String get shareIcvpQrCodeScreenTitle;
+
   /// No description provided for @shareQrCodeDescription.
   ///
   /// In en, this message translates to:
@@ -613,6 +643,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error loading IPS data. Please try again.'**
   String get ipsLoadErrorMessage;
+
+  /// No description provided for @recoverPasswordSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Recover password email sent'**
+  String get recoverPasswordSent;
+
+  /// No description provided for @addToWalletLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to Wallet'**
+  String get addToWalletLabel;
 }
 
 class _AppLocalizationsDelegate

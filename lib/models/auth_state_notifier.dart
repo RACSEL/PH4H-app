@@ -55,6 +55,20 @@ class AuthStateNotifier extends StateNotifier<AsyncValue<(String?, bool)>> {
     }
   }
 
+  Future<void> recoverPassword() async {
+    try {
+      await ApiManager.instance.recoverPassword();
+      return;
+    } on DioException catch (err, st) {
+      if (kDebugMode) {
+        debugPrint(err.toString());
+        debugPrintStack(
+            label: 'AuthStateNotifier.recoverPassword', stackTrace: st);
+      }
+      rethrow;
+    }
+  }
+
   Future<void> register(
       String identifier,
       String email,
@@ -92,6 +106,7 @@ class AuthStateNotifier extends StateNotifier<AsyncValue<(String?, bool)>> {
 }
 
 final authStateProvider =
-    StateNotifierProvider<AuthStateNotifier, AsyncValue<(String?, bool)>>((ref) {
+    StateNotifierProvider<AuthStateNotifier, AsyncValue<(String?, bool)>>(
+        (ref) {
   return AuthStateNotifier(ref);
 });

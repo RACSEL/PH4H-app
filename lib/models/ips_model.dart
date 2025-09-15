@@ -11,8 +11,11 @@ class MedicationInfo {
   String? statementFullUrl;
   MedicationStatement? statement;
 
-  MedicationInfo({required this.medicationFullUrl, required this.medication, this.statementFullUrl, this.statement});
-
+  MedicationInfo(
+      {required this.medicationFullUrl,
+      required this.medication,
+      this.statementFullUrl,
+      this.statement});
 
   Map<String, dynamic> toJson() {
     return {
@@ -32,10 +35,28 @@ class MedicationInfo {
             : null;
 }
 
-enum IpsSource {
-  national,
-  vhl
+class ImmunizationWithSource {
+  Immunization immunization;
+
+  // flag to indicate if the immunization comes in the original IPS (true)
+  // or comes as a result of a IPS merge (false)
+  bool original;
+
+  ImmunizationWithSource({required this.immunization, required this.original});
+
+  Map<String, dynamic> toJson() {
+    return {
+      'immunization': immunization.toJson(),
+      'original': original,
+    };
+  }
+
+  ImmunizationWithSource.fromJson(Map<String, dynamic> json)
+      : immunization = Immunization.fromJson(json['immunization']),
+        original = json['original'];
 }
+
+enum IpsSource { national, vhl }
 
 class IPSModel extends ChangeNotifier {
   bool isInStorage = false;
@@ -43,8 +64,11 @@ class IPSModel extends ChangeNotifier {
   Map<String, Condition> conditions = {};
   Map<String, AllergyIntolerance> allergies = {};
   List<MedicationInfo> medications = [];
-  Map<String, Immunization> immunizations = {};
+  Map<String, ImmunizationWithSource> immunizations = {};
+  Map<String, Procedure> procedures = {};
+  Map<String, bool> originalImmunizations = {};
   String? vhl;
+  Map<String, dynamic>? vhlPayload;
 
   Future<bool> checkStorage() async {
     isInStorage = await IPSLoader.instance.isStored();
@@ -62,17 +86,31 @@ class IPSModel extends ChangeNotifier {
       allergies = ips.$3;
       medications = ips.$4;
       immunizations = ips.$5;
+      procedures = ips.$6;
+      originalImmunizations.clear();
+      for (var immunization in immunizations.values) {
+        originalImmunizations[immunization.immunization.vaccineCode.coding![0]
+            .code!.value!] = immunization.original;
+      }
     } else {
       bundle = await IPSLoader.instance.fetchIPSFromNationalNode();
       _parseBundle();
-      await IPSLoader.instance.storeIps(bundle!, conditions, allergies, medications, immunizations);
+      originalImmunizations.clear();
+      for (var immunization in immunizations.values) {
+        immunization.original = true;
+        originalImmunizations[immunization
+            .immunization.vaccineCode.coding![0].code!.value!] = true;
+      }
+      await IPSLoader.instance.storeIps(bundle!, conditions, allergies,
+          medications, immunizations, procedures);
       isInStorage = true;
     }
     notifyListeners();
   }
 
   Future<void> initStateWithVhlCode(String vhlCode) async {
-    throw Exception("IpsModel cannot be initialized with VhlCode. Use initState instead.");
+    throw Exception(
+        "IpsModel cannot be initialized with VhlCode. Use initState instead.");
   }
 
   void _cleanState() {
@@ -81,7 +119,7 @@ class IPSModel extends ChangeNotifier {
     allergies.clear();
     medications.clear();
     immunizations.clear();
-    isInStorage=false;
+    isInStorage = false;
   }
 
   void _parseBundle() {
@@ -103,7 +141,10 @@ class IPSModel extends ChangeNotifier {
           } else if (resourceType == 'Medication') {
             medicationEntries[item["fullUrl"]] = Medication.fromJson(resource);
           } else if (resourceType == 'MedicationStatement') {
-            medicationStatementsEntries[item["fullUrl"]] = MedicationStatement.fromJson(resource);
+            medicationStatementsEntries[item["fullUrl"]] =
+                MedicationStatement.fromJson(resource);
+          } else if (resourceType == 'Procedure') {
+            procedures[item["fullUrl"]] = Procedure.fromJson(resource);
           } else if (resourceType == 'Immunization') {
             if (resource['patient'] == null) {
               resource['patient'] = {"reference": "Patient/unknown"};
@@ -122,7 +163,8 @@ class IPSModel extends ChangeNotifier {
                 "text": "Unknown Vaccine"
               };
             }
-            immunizations[item["fullUrl"]] = Immunization.fromJson(resource);
+            immunizations[item["fullUrl"]] = ImmunizationWithSource(
+                immunization: Immunization.fromJson(resource), original: false);
           }
         }
         _linkMedicationInfo(medicationEntries, medicationStatementsEntries);
@@ -137,10 +179,16 @@ class IPSModel extends ChangeNotifier {
   void _linkMedicationInfo(Map<String, Medication> medEntries,
       Map<String, MedicationStatement> medStatementEntries) {
     for (var medEntryFullUrl in medEntries.keys) {
-      MedicationInfo medInfo = MedicationInfo(medicationFullUrl: medEntryFullUrl, medication: medEntries[medEntryFullUrl]!);
+      MedicationInfo medInfo = MedicationInfo(
+          medicationFullUrl: medEntryFullUrl,
+          medication: medEntries[medEntryFullUrl]!);
       for (var medStatementEntryFullUrl in medStatementEntries.keys) {
         if (medEntries[medEntryFullUrl]!.fhirId ==
-            medStatementEntries[medStatementEntryFullUrl]!.medicationReference?.reference?.split(':').last) {
+            medStatementEntries[medStatementEntryFullUrl]!
+                .medicationReference
+                ?.reference
+                ?.split(':')
+                .last) {
           medInfo.statementFullUrl = medStatementEntryFullUrl;
           medInfo.statement = medStatementEntries[medStatementEntryFullUrl];
           break;
@@ -153,8 +201,9 @@ class IPSModel extends ChangeNotifier {
   Future<void> updateVhl(Map<String, dynamic>? filteredIPS) async {
     try {
       if (filteredIPS != null) {
-        final response =  await ApiManager.instance.getVHL(filteredIPS);
+        final response = await ApiManager.instance.getVHL(filteredIPS);
         vhl = response.data["data"];
+        vhlPayload = response.data["payload"];
         notifyListeners();
       }
     } on DioException catch (e) {
@@ -164,7 +213,7 @@ class IPSModel extends ChangeNotifier {
   }
 
   void clearVhl() {
-   vhl = null;
+    vhl = null;
   }
 
   Future<void> clear() async {
@@ -174,6 +223,7 @@ class IPSModel extends ChangeNotifier {
     allergies.clear();
     medications.clear();
     immunizations.clear();
+    originalImmunizations.clear();
     await IPSLoader.instance.clearStoredIps();
     isInStorage = false;
   }
@@ -184,7 +234,17 @@ class IPSModel extends ChangeNotifier {
       _cleanState();
       bundle = newBundleResp.data;
       _parseBundle();
-      await IPSLoader.instance.storeIps(bundle!, conditions, allergies, medications, immunizations);
+      for (var immunization in immunizations.values) {
+        if (originalImmunizations.containsKey(
+            immunization.immunization.vaccineCode.coding![0].code!.value!)) {
+          immunization.original = true;
+        } else {
+          originalImmunizations[immunization
+              .immunization.vaccineCode.coding![0].code!.value!] = false;
+        }
+      }
+      await IPSLoader.instance.storeIps(bundle!, conditions, allergies,
+          medications, immunizations, procedures);
       isInStorage = true;
       notifyListeners();
     } else {
@@ -198,10 +258,10 @@ final ipsModelProvider = ChangeNotifierProvider<IPSModel>((ref) {
 });
 
 class IpsVhlModel extends IPSModel {
-
   @override
   Future<void> initState() async {
-    throw Exception("IpsVhlModel cannot be initialized directly. Use initStateWithVhlCode instead.");
+    throw Exception(
+        "IpsVhlModel cannot be initialized directly. Use initStateWithVhlCode instead.");
   }
 
   @override

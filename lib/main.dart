@@ -8,6 +8,7 @@ import 'package:ips_lacpass_app/l10n/locale_provider.dart';
 import 'package:ips_lacpass_app/models/ips_model.dart';
 import 'package:ips_lacpass_app/screens/forgot_password/forgot_password_screen.dart';
 import 'package:ips_lacpass_app/screens/home/home_screen.dart';
+import 'package:ips_lacpass_app/screens/icvp_qr/icvp_qr_screen.dart';
 import 'package:ips_lacpass_app/screens/ips_viewer/ips_viewer_screen.dart';
 import 'package:ips_lacpass_app/screens/landing/landing_screen.dart';
 import 'package:ips_lacpass_app/screens/login/login_screen.dart';
@@ -59,6 +60,7 @@ class App extends ConsumerWidget {
           '/home': (context) => AuthCheckerWidget(child: HomeScreen()),
           '/ips': (context) => AuthCheckerWidget(child: IPSViewerScreen(source: IpsSource.national)),
           '/scan-qr': (context) => AuthCheckerWidget(child: CameraScannerScreen()),
+          '/icvp-qr': (context) => AuthCheckerWidget(child: ICVPQRScreen())
         });
   }
 }

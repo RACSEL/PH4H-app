@@ -50,4 +50,7 @@ class Constants {
   static final int vhlExpirationDays =
       int.parse(dotenv.env['VHL_EXPIRATION_DAYS']!);
   static final String vhlPassCode = dotenv.env['VHL_PASS_CODE']!;
+
+  // Wallet
+  static final bool showWallet = dotenv.env['SHOW_WALLET'] == '1';
 }

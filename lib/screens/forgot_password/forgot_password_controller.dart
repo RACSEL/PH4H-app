@@ -1,6 +1,7 @@
 part of 'forgot_password_screen.dart';
 
-abstract class ForgotPasswordController extends State<ForgotPasswordScreen> {
+abstract class ForgotPasswordController
+    extends ConsumerState<ForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
 
   bool _userInteractsWithAllFields() => _inputEmail != null;
@@ -30,7 +31,28 @@ abstract class ForgotPasswordController extends State<ForgotPasswordScreen> {
   }
 
   void _submitForm() async {
-    //TODO: implement submit forgot password form
-    print('Forgot Password');
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+    _formKey.currentState!.save();
+    ref.read(authStateProvider.notifier).recoverPassword().onError((err, st) {
+      if (err is DioException) {
+        if (err.response?.statusCode == 401) {
+          if (mounted) {
+            showTopSnackBar(
+              context,
+              AppLocalizations.of(context)!.incorrectEmailFormatValidation,
+            );
+          }
+        } else if (err.response?.statusCode == 400) {
+          if (mounted) {
+            showTopSnackBar(
+              context,
+              AppLocalizations.of(context)!.incorrectEmailFormatValidation,
+            );
+          }
+        }
+      }
+    });
   }
 }

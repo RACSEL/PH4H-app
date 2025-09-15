@@ -200,14 +200,55 @@ class _IPSViewerScreen extends IPSResourceSelectionController {
                                         padding: const EdgeInsets.fromLTRB(
                                             0, 10, 0, 0),
                                         child: Text(
-                                          immunizationEntry.value.vaccineCode
+                                          immunizationEntry.value.immunization.vaccineCode
                                                   .coding?[0].display ??
                                               '',
                                           style: TextStyle(
                                               fontWeight: FontWeight.bold),
                                         )),
-                                  ))
-                        ]))
+                                  )),
+                          ...ref
+                              .read(ipsModelProvider
+                              .select((ips) => ips.procedures))
+                              .entries
+                              .map((procedureEntry) => CheckboxListTile(
+                            controlAffinity:
+                            ListTileControlAffinity.leading,
+                            value: _selectedProceduresIndex
+                                .contains(procedureEntry.key),
+                            onChanged: (newValue) {
+                              setState(() {
+                                if (newValue == true) {
+                                  _selectedProceduresIndex
+                                      .add(procedureEntry.key);
+                                } else {
+                                  _selectedProceduresIndex
+                                      .remove(procedureEntry.key);
+                                }
+                              });
+                            },
+                            title: Row(children: [
+                              Icon(MdiIcons.radiologyBox, size: 25),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              Text(AppLocalizations.of(context)!
+                                  .proceduresSectionTitle(1))
+                            ]),
+                            contentPadding:
+                            const EdgeInsets.fromLTRB(0, 10, 0, 10),
+                            subtitle: Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                    0, 10, 0, 0),
+                                child: Text(
+                                  procedureEntry.value.code?.coding?[0].display
+                                      ?? procedureEntry.value.code?.text
+                                      ?? '',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                )),
+                          ))
+                        ])),
                   ])),
                   SizedBox(height: 15),
                   FilledButton(

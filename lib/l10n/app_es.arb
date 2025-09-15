@@ -52,8 +52,12 @@
   "conditionStatusInactive": "Inactiva",
   "conditionEncounterDiagnosis": "Diagnóstico de encuentro",
   "immunizationSectionTitle": "{count, plural, =1{Vacuna} other{Vacunas}}",
+  "proceduresSectionTitle": "{count, plural, =1{Procedimiento} other{Procedimientos}}",
+  "procedurePerformedDate": "Fecha",
   "loadingIPSDataTitle": "Cargando datos IPS",
+  "updatingIpsDataTitle": "Actualizando datos IPS",
   "loadingVHLDataTitle": "Cargando QR",
+  "loadingICVPTitle": "Cargando QR de su vacuna",
   "shareDataButtonLabel": "Compartir",
   "medicationsSectionTitle": "{count, plural, =1{Medicamento} other{Medicamentos}}",
   "emptyRepeatPasswordValidation": "Por favor confirma tu contraseña",
@@ -73,6 +77,7 @@
   "updateButtonLabel": "Actualizar",
   "userUpdatedMessage": "Usuario actualizado",
   "shareQrCodeScreenTitle": "Código QR Generado",
+  "shareIcvpQrCodeScreenTitle": "ICVP QR",
   "shareQrCodeDescription": "Comparte este código QR con tu médico o proveedor de atención médica.",
   "shareQrCodeBackToHomeButtonLabel": "Volver al inicio",
   "resourceSelectionTitle": "Información compartida",
@@ -84,5 +89,7 @@
   "cancel": "Cancelar",
   "save": "Guardar",
   "invalidQrMessage": "QR inválido. Por favor intente nuevamente.",
-  "ipsLoadErrorMessage": "Error al cargar IPS. Por favor intente nuevamente."
+  "ipsLoadErrorMessage": "Error al cargar IPS. Por favor intente nuevamente.",
+  "addToWalletLabel": "Agregar a Wallet",
+  "recoverPasswordSent": "Enviamos el correo para recuperar contraseña."
 }

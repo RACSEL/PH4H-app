@@ -1,4 +1,4 @@
-# IPS PH4H App
+# IPS Lacpass App
 
 Unified health app for Connectathon users to view, merge, and share IPS data securely—cross-border, patient-managed, FHIR-compatible, and easy to use.
 
@@ -57,7 +57,7 @@ KEYCLOAK_CLIENT_ID=''
 KEYCLOAK_REFRESH_TOKEN_KEY=''
 
 # IPS
-# The number of days the user's IPS bundle will be stored in the device storage after fetching it from 
+# The number of days the user's IPS bundle will be stored in the device storage after fetching it from
 # the FHIR server
 IPS_EXP_DAYS=6
 
@@ -66,6 +66,10 @@ IPS_EXP_DAYS=6
 VHL_EXPIRATION_DAYS=14
 # In case you want to add a passcode to the generated QR code
 VHL_PASS_CODE='0000'
+
+# Wallet
+# Disabled by default, change value to "1" to enable wallet
+SHOW_WALLET=0
 ```
 
 All other settings are optional. If you want to customize color, icons, locales, etc, please check the details on this [guide](./docs/customize-your-app.md).

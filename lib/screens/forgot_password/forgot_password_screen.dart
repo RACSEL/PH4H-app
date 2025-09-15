@@ -1,15 +1,19 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:ips_lacpass_app/constants.dart';
 import 'package:ips_lacpass_app/l10n/app_localizations.dart';
+import 'package:ips_lacpass_app/models/auth_state_notifier.dart';
+import 'package:ips_lacpass_app/widgets/snackbar.dart';
 
 part 'forgot_password_controller.dart';
 
-class ForgotPasswordScreen extends StatefulWidget {
+class ForgotPasswordScreen extends ConsumerStatefulWidget {
   const ForgotPasswordScreen({super.key});
 
   @override
-  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreen();
+  ConsumerState<ForgotPasswordScreen> createState() => _ForgotPasswordScreen();
 }
 
 class _ForgotPasswordScreen extends ForgotPasswordController {

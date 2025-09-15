@@ -96,8 +96,9 @@ class _LoginScreen extends LoginController {
                                   ),
                                   TextButton(
                                       onPressed: () {
-                                        Navigator.pushNamed(
-                                            context, '/forgot-password');
+                                        ref
+                                            .read(authStateProvider.notifier)
+                                            .recoverPassword();
                                       },
                                       child: Text(AppLocalizations.of(context)!
                                           .forgotPasswordLinkLabel)),

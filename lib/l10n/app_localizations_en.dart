@@ -195,10 +195,30 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String proceduresSectionTitle(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Procedures',
+      one: 'Procedure',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get procedurePerformedDate => 'Date';
+
+  @override
   String get loadingIPSDataTitle => 'Loading IPS Data';
 
   @override
+  String get updatingIpsDataTitle => 'Updating IPS Data';
+
+  @override
   String get loadingVHLDataTitle => 'Loading QR';
+
+  @override
+  String get loadingICVPTitle => 'Loading vaccine QR';
 
   @override
   String get shareDataButtonLabel => 'Share';
@@ -268,6 +288,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shareQrCodeScreenTitle => 'QR Code Generated';
 
   @override
+  String get shareIcvpQrCodeScreenTitle => 'ICVP QR';
+
+  @override
   String get shareQrCodeDescription =>
       'Share this QR code with your physician or health care provider.';
 
@@ -304,4 +327,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ipsLoadErrorMessage => 'Error loading IPS data. Please try again.';
+
+  @override
+  String get recoverPasswordSent => 'Recover password email sent';
+
+  @override
+  String get addToWalletLabel => 'Add to Wallet';
 }

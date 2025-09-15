@@ -1,44 +1,52 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ips_lacpass_app/api/api_manager.dart';
 import 'package:ips_lacpass_app/constants.dart';
 import 'package:ips_lacpass_app/l10n/app_localizations.dart';
 import 'package:ips_lacpass_app/models/credential_type.dart';
-import 'package:ips_lacpass_app/models/ips_model.dart';
-import 'package:ips_lacpass_app/screens/ips_viewer/ips_viewer_screen.dart';
 import 'package:ips_lacpass_app/widgets/patient_appbar/patient_appbar_widget.dart';
 import 'package:ips_lacpass_app/widgets/snackbar.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-part 'share_qr_code_controller.dart';
+part 'icvp_qr_controller.dart';
 
-class ShareQrCodeScreen extends ConsumerStatefulWidget {
-  const ShareQrCodeScreen({super.key});
+class ICVPQRScreenArguments {
+  final String bundleId;
+  final String? immunizationId;
 
-  @override
-  ConsumerState<ShareQrCodeScreen> createState() => _ShareQrCodeScreen();
+  const ICVPQRScreenArguments({required this.bundleId, this.immunizationId});
 }
 
-class _ShareQrCodeScreen extends ShareQrCodeController {
-  _ShareQrCodeScreen() : super();
+class ICVPQRScreen extends StatefulWidget {
+  final bool loading = true;
+
+  const ICVPQRScreen({super.key});
 
   @override
+  State<StatefulWidget> createState() => _ICVPScreen();
+}
+
+class _ICVPScreen extends ICVPQRController {
+  @override
   Widget build(BuildContext context) {
+    final args =
+        ModalRoute.of(context)!.settings.arguments as ICVPQRScreenArguments;
+
+    if (icvpQrContent == null) {
+      getICVP(args.bundleId, args.immunizationId);
+    }
+
     return Scaffold(
-      appBar: PatientAppBar(goBackCallback: () {
-        ref.read(ipsModelProvider.notifier).clearVhl();
-      }),
+      appBar: PatientAppBar(),
       body: SafeArea(
-        child: qrCodeContent == null
+        child: icvpQrContent == null
             ? SingleChildScrollView(
                 child: Padding(
                     padding: const EdgeInsets.fromLTRB(36, 10, 36, 36),
                     child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                              AppLocalizations.of(context)!.loadingVHLDataTitle,
+                          Text(AppLocalizations.of(context)!.loadingICVPTitle,
                               style: TextStyle(fontSize: 36)),
                           SizedBox(
                             height: 32,
@@ -60,7 +68,7 @@ class _ShareQrCodeScreen extends ShareQrCodeController {
                         const SizedBox(height: 8),
                         Text(
                             AppLocalizations.of(context)!
-                                .shareQrCodeScreenTitle,
+                                .shareIcvpQrCodeScreenTitle,
                             style: Theme.of(context).textTheme.headlineSmall),
                         const SizedBox(height: 32),
                         Text(
@@ -69,7 +77,7 @@ class _ShareQrCodeScreen extends ShareQrCodeController {
                             style: Theme.of(context).textTheme.bodyMedium),
                         const SizedBox(height: 12),
                         QrImageView(
-                          data: qrCodeContent,
+                          data: icvpQrContent!,
                           version: QrVersions.auto,
                         ),
                         if (Constants.showWallet) const SizedBox(height: 20),
@@ -121,13 +129,8 @@ class _ShareQrCodeScreen extends ShareQrCodeController {
                         children: [
                           OutlinedButton(
                             onPressed: () {
-                              Navigator.of(context).pushAndRemoveUntil(
-                                MaterialPageRoute(
-                                  builder: (context) => IPSViewerScreen(
-                                      source: IpsSource.national),
-                                ),
-                                (Route<dynamic> route) => false,
-                              );
+                              icvpQrContent = null;
+                              Navigator.of(context).pop();
                             },
                             child: Padding(
                               padding: EdgeInsets.symmetric(vertical: 10),

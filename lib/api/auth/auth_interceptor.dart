@@ -86,7 +86,6 @@ class AuthInterceptor extends QueuedInterceptor {
 
     //success, update token and retry request
     try {
-      final response = await (ApiManager.instance).refreshToken(refreshToken);
       await TokenManager.instance.setTokens(
           response.data['access_token'],
           refreshToken: response.data['refresh_token'],
