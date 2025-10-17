@@ -4,16 +4,49 @@ import 'package:ips_lacpass_app/models/user_model.dart';
 import 'package:ips_lacpass_app/screens/settings/settings_screen.dart';
 
 class PatientAppBar extends ConsumerWidget implements PreferredSizeWidget {
-
   final Function? goBackCallback;
+  final List<Widget>? additionalActions;
 
-  const PatientAppBar({super.key, this.goBackCallback});
+  const PatientAppBar({super.key, this.goBackCallback, this.additionalActions});
 
   @override
   Size get preferredSize => Size.fromHeight(kToolbarHeight);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    List<Widget> actions = [];
+    if (additionalActions != null && additionalActions!.isNotEmpty) {
+      actions = [
+        ...additionalActions!,
+        IconButton(
+          color: Theme.of(context).colorScheme.primary,
+          icon: Icon(Icons.settings),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const SettingsScreen(),
+              ),
+            );
+          },
+        ),
+      ];
+    } else {
+      actions = [
+        IconButton(
+          color: Theme.of(context).colorScheme.primary,
+          icon: Icon(Icons.settings),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const SettingsScreen(),
+              ),
+            );
+          },
+        ),
+      ];
+    }
     return AppBar(
       leading: Navigator.canPop(context)
           ? IconButton(
@@ -37,41 +70,30 @@ class PatientAppBar extends ConsumerWidget implements PreferredSizeWidget {
               height: 40,
             ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "${ref.read(userModelProvider)?.firstName} ${ref.read(userModelProvider)?.lastName}",
-                style: Theme.of(context)
-                    .textTheme
-                    .titleLarge!
-                    .copyWith(color: Theme.of(context).colorScheme.onSurface),
-                overflow: TextOverflow.ellipsis,
-              ),
-              Text(
-                "${ref.read(userModelProvider)?.identifier}",
-                style: Theme.of(context).textTheme.labelSmall!.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "${ref.read(userModelProvider)?.firstName} ${ref.read(userModelProvider)?.lastName}",
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleLarge!
+                      .copyWith(color: Theme.of(context).colorScheme.onSurface),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  "${ref.read(userModelProvider)?.identifier}",
+                  style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
           ),
         ],
       ),
-      actions: [
-        IconButton(
-          color: Theme.of(context).colorScheme.primary,
-          icon: Icon(Icons.settings),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const SettingsScreen(),
-              ),
-            );
-          },
-        ),
-      ],
+      actions: actions,
     );
   }
 }

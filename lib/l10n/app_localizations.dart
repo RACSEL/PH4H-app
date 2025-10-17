@@ -296,6 +296,12 @@ abstract class AppLocalizations {
   /// **'Country'**
   String get countryInputLabel;
 
+  /// No description provided for @countryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get countryLabel;
+
   /// No description provided for @identifierInputLabel.
   ///
   /// In en, this message translates to:
@@ -602,6 +608,12 @@ abstract class AppLocalizations {
   /// **'Generate QR Code'**
   String get generateQrCodeButtonLabel;
 
+  /// No description provided for @generate.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate'**
+  String get generate;
+
   /// No description provided for @loginInvalidCredentials.
   ///
   /// In en, this message translates to:
@@ -655,6 +667,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add to Wallet'**
   String get addToWalletLabel;
+
+  /// No description provided for @dateNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Date not available'**
+  String get dateNotAvailable;
+
+  /// No description provided for @noDoseInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'No dose information'**
+  String get noDoseInformation;
+
+  /// No description provided for @organizationsSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Organization} other{Organizations}}'**
+  String organizationsSectionTitle(num count);
+
+  /// No description provided for @labelAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get labelAddress;
+
+  /// No description provided for @labelPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get labelPhone;
+
+  /// No description provided for @createPasscodeTitleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a passcode'**
+  String get createPasscodeTitleLabel;
+
+  /// No description provided for @passcodeTitleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill the passcode'**
+  String get passcodeTitleLabel;
+
+  /// No description provided for @passcodeInputLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Passcode'**
+  String get passcodeInputLabel;
+
+  /// No description provided for @submitPasscode.
+  ///
+  /// In en, this message translates to:
+  /// **'Load VHL'**
+  String get submitPasscode;
+
+  /// No description provided for @regenerateICVP.
+  ///
+  /// In en, this message translates to:
+  /// **'Recreate ICVP QR'**
+  String get regenerateICVP;
+
+  /// No description provided for @icvpListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanned Immunizations'**
+  String get icvpListTitle;
+
+  /// No description provided for @issueDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Issue date'**
+  String get issueDateLabel;
+
+  /// No description provided for @expirationDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiration date'**
+  String get expirationDateLabel;
+
+  /// No description provided for @noICVPFoundLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'No immunizations to display'**
+  String get noICVPFoundLabel;
+
+  /// No description provided for @icvpAddedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Immunization saved'**
+  String get icvpAddedLabel;
+
+  /// No description provided for @addNewICVPButtonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan new ICVP'**
+  String get addNewICVPButtonLabel;
 }
 
 class _AppLocalizationsDelegate

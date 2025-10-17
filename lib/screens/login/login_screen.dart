@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ips_lacpass_app/models/auth_state_notifier.dart';
+import 'package:ips_lacpass_app/utils/error_utils.dart';
+import 'package:ips_lacpass_app/widgets/filled_button.dart';
 import 'package:ips_lacpass_app/widgets/patient_form/document_type_select.dart';
 
 import 'package:ips_lacpass_app/l10n/app_localizations.dart';
@@ -108,23 +110,17 @@ class _LoginScreen extends LoginController {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.stretch,
                                     children: [
-                                      FilledButton(
-                                          onPressed: _submitting ||
-                                                  !_userInteractsWithAllFields() ||
-                                                  _formKey.currentState ==
-                                                      null ||
-                                                  !_formKey.currentState!
-                                                      .validate()
-                                              ? null
-                                              : _submitForm,
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                vertical: 10),
-                                            child: Text(
-                                                AppLocalizations.of(context)!
-                                                    .loginButtonLabel,
-                                                style: TextStyle(fontSize: 18)),
-                                          )),
+                                      Ph4hFilledButton(
+                                          submitting: _submitting,
+                                          buttonLabel:
+                                              AppLocalizations.of(context)!
+                                                  .loginButtonLabel,
+                                          isDisabled: _submitting ||
+                                              !_userInteractsWithAllFields() ||
+                                              _formKey.currentState == null ||
+                                              !_formKey.currentState!
+                                                  .validate(),
+                                          onPressed: _submitForm),
                                       SizedBox(
                                         height: 10,
                                       ),

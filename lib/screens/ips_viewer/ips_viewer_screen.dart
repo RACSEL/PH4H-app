@@ -1,5 +1,7 @@
-import 'package:flutter/foundation.dart';
+import 'package:dio/dio.dart';
+import 'package:fhir/r4/resource_types/base/entities1/entities1.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ips_lacpass_app/l10n/app_localizations.dart';
 import 'package:ips_lacpass_app/screens/home/home_screen.dart';
@@ -10,7 +12,9 @@ import 'package:ips_lacpass_app/models/ips_model.dart';
 import 'package:ips_lacpass_app/models/user_model.dart';
 import 'package:ips_lacpass_app/screens/ips_viewer/immunizations_card.dart';
 import 'package:ips_lacpass_app/screens/ips_viewer/medications_card.dart';
+// import 'package:ips_lacpass_app/screens/ips_viewer/organizations_card.dart';
 import 'package:ips_lacpass_app/screens/ips_viewer/procedures_card.dart';
+import 'package:ips_lacpass_app/utils/error_utils.dart';
 import 'package:ips_lacpass_app/widgets/patient_appbar/patient_appbar_widget.dart';
 import 'package:ips_lacpass_app/widgets/qr_scanner_button.dart';
 import 'package:ips_lacpass_app/widgets/snackbar.dart';
@@ -21,20 +25,28 @@ part 'ips_viewer_controller.dart';
 class IPSViewerScreen extends ConsumerStatefulWidget {
   final IpsSource source;
   final String? vhlCode;
+  final String? passcode;
 
-  const IPSViewerScreen({super.key, required this.source, this.vhlCode});
+  const IPSViewerScreen(
+      {super.key, required this.source, this.vhlCode, this.passcode});
 
   @override
   ConsumerState<IPSViewerScreen> createState() =>
-      _IPSViewerScreen(source, vhlCode);
+      _IPSViewerScreen(source, vhlCode, passcode);
 }
 
 class _IPSViewerScreen extends IPSViewerController {
-  _IPSViewerScreen(IpsSource source, String? vhlCode)
-      : super(source: source, vhlCode: vhlCode);
+  _IPSViewerScreen(IpsSource source, String? vhlCode, String? passcode)
+      : super(source: source, vhlCode: vhlCode, passcode: passcode);
 
   @override
   Widget build(BuildContext context) {
+    List<MapEntry<String, Organization>> organizationList;
+
+    List<MapEntry<String, Organization>> organizationMapSelector(
+            IPSModel ips) =>
+        ips.organizations.entries.toList();
+
     switch (source) {
       case IpsSource.national:
         ref.listen(ipsModelProvider.select((ips) => ips.bundle),
@@ -45,6 +57,8 @@ class _IPSViewerScreen extends IPSViewerController {
             });
           }
         });
+        organizationList =
+            ref.read(ipsModelProvider.select(organizationMapSelector));
         break;
       case IpsSource.vhl:
         ref.listen(ipsVhlModelProvider.select((ips) => ips.bundle),
@@ -55,9 +69,21 @@ class _IPSViewerScreen extends IPSViewerController {
             });
           }
         });
+        organizationList =
+            ref.read(ipsVhlModelProvider.select(organizationMapSelector));
     }
     return Scaffold(
-        appBar: PatientAppBar(),
+        appBar: PatientAppBar(
+          additionalActions: [
+            IconButton(
+              color: Theme.of(context).colorScheme.primary,
+              icon: Icon(MdiIcons.needle),
+              onPressed: () {
+                Navigator.pushNamed(context, "/icvp-qr/list");
+              },
+            ),
+          ],
+        ),
         body: Padding(
             padding: const EdgeInsets.fromLTRB(36, 10, 36, 36),
             child: AnimatedSwitcher(
@@ -94,15 +120,22 @@ class _IPSViewerScreen extends IPSViewerController {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.stretch,
                                       children: [
-                                        ConditionsCard(source: source),
-                                        SizedBox(height: 23),
-                                        AllergiesCard(source: source),
-                                        SizedBox(height: 23),
-                                        MedicationsCard(source: source),
-                                        SizedBox(height: 23),
-                                        ImmunizationsCard(source: source),
-                                        SizedBox(height: 23),
-                                        ProceduresCard(source: source)
+                                        // OrganizationsCard(source: source),
+                                        ConditionsCard(
+                                            source: source,
+                                            organizationList: organizationList),
+                                        AllergiesCard(
+                                            source: source,
+                                            organizationList: organizationList),
+                                        MedicationsCard(
+                                            source: source,
+                                            organizationList: organizationList),
+                                        ImmunizationsCard(
+                                            source: source,
+                                            organizationList: organizationList),
+                                        ProceduresCard(
+                                            source: source,
+                                            organizationList: organizationList)
                                       ]))
                             ])),
                             SizedBox(height: 15),

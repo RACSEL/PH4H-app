@@ -55,7 +55,7 @@ abstract class SignupController extends ConsumerState<SignupScreen> {
       return AppLocalizations.of(context)!.emptyPasswordValidation;
     }
     if (value.length < 8) {
-      return AppLocalizations.of(context)!.invalidPassportFormatValidation;
+      return AppLocalizations.of(context)!.invalidPasswordValidation;
     }
     return null;
   }
@@ -124,11 +124,12 @@ abstract class SignupController extends ConsumerState<SignupScreen> {
       }
     }).onError((err, st) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('An unexpected error has occurred',
-                style: TextStyle(color: Theme.of(context).colorScheme.onError)),
-            duration: const Duration(seconds: 2),
-            backgroundColor: Theme.of(context).colorScheme.error));
+        if (err is DioException) {
+          showUnexpectedError(context, err);
+        } else {
+          showTopSnackBar(
+              context, AppLocalizations.of(context)!.unexpectedErrorMessage);
+        }
       }
     });
     setState(() {

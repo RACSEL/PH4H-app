@@ -4,25 +4,25 @@ class Constants {
   Constants._(); //private constructor to prevent instantiation
 
   static final List<Map<String, String>> countryOptions = [
-    {'value': 'AR', 'label': 'Argentina'},
-    {'value': 'BS', 'label': 'Bahamas'},
-    {'value': 'BB', 'label': 'Barbados'},
-    {'value': 'BZ', 'label': 'Belize'},
-    {'value': 'BO', 'label': 'Bolivia'},
-    {'value': 'BR', 'label': 'Brazil'},
-    {'value': 'CL', 'label': 'Chile'},
-    {'value': 'CO', 'label': 'Colombia'},
-    {'value': 'CR', 'label': 'Costa Rica'},
-    {'value': 'EC', 'label': 'Ecuador'},
-    {'value': 'SV', 'label': 'El Salvador'},
-    {'value': 'GT', 'label': 'Guatemala'},
-    {'value': 'HN', 'label': 'Honduras'},
-    {'value': 'PA', 'label': 'Panama'},
-    {'value': 'PY', 'label': 'Paraguay'},
-    {'value': 'PE', 'label': 'Perú'},
-    {'value': 'DO', 'label': 'Republica Dominicana'},
-    {'value': 'SR', 'label': 'Suriname'},
-    {'value': 'UY', 'label': 'Uruguay'}
+    {'value': 'AR', 'label': 'Argentina', 'emoji': '🇦🇷'},
+    {'value': 'BS', 'label': 'Bahamas', 'emoji': '🇧🇸'},
+    {'value': 'BB', 'label': 'Barbados', 'emoji': '🇧🇧'},
+    {'value': 'BZ', 'label': 'Belize', 'emoji': '🇧🇿'},
+    {'value': 'BO', 'label': 'Bolivia', 'emoji': '🇧🇴'},
+    {'value': 'BR', 'label': 'Brazil', 'emoji': '🇧🇷'},
+    {'value': 'CL', 'label': 'Chile', 'emoji': '🇨🇱'},
+    {'value': 'CO', 'label': 'Colombia', 'emoji': '🇨🇴'},
+    {'value': 'CR', 'label': 'Costa Rica', 'emoji': '🇨🇷'},
+    {'value': 'EC', 'label': 'Ecuador', 'emoji': '🇪🇨'},
+    {'value': 'SV', 'label': 'El Salvador', 'emoji': '🇸🇻'},
+    {'value': 'GT', 'label': 'Guatemala', 'emoji': '🇬🇹'},
+    {'value': 'HN', 'label': 'Honduras', 'emoji': '🇭🇳'},
+    {'value': 'PA', 'label': 'Panama', 'emoji': '🇵🇦'},
+    {'value': 'PY', 'label': 'Paraguay', 'emoji': '🇵🇾'},
+    {'value': 'PE', 'label': 'Perú', 'emoji': '🇵🇪'},
+    {'value': 'DO', 'label': 'Republica Dominicana', 'emoji': '🇩🇴'},
+    {'value': 'SR', 'label': 'Suriname', 'emoji': '🇸🇷'},
+    {'value': 'UY', 'label': 'Uruguay', 'emoji': '🇺🇾'}
   ];
 
   static final RegExp dniRegex = RegExp(r'^[a-zA-Z0-9\-\.\/]{1,16}$');
@@ -49,8 +49,11 @@ class Constants {
   //VHL
   static final int vhlExpirationDays =
       int.parse(dotenv.env['VHL_EXPIRATION_DAYS']!);
-  static final String vhlPassCode = dotenv.env['VHL_PASS_CODE']!;
 
   // Wallet
   static final bool showWallet = dotenv.env['SHOW_WALLET'] == '1';
+
+  // General
+  static final bool useHttp = dotenv.env['USE_HTTP'] == '1';
+  static final bool debugMode = dotenv.env['DEBUG_MODE'] == '1';
 }

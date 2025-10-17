@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ips_lacpass_app/api/icvp_loader.dart';
 import 'package:ips_lacpass_app/api/ips_loader.dart';
 import 'package:ips_lacpass_app/l10n/app_localizations.dart';
 import 'package:ips_lacpass_app/styles/color_theme.dart';
@@ -9,6 +10,7 @@ class LandingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     IPSLoader.instance.clearStoredIps();
+    ICVPLoader.instance.clearStoredIcvp();
     return Scaffold(
       body: SizedBox.expand(
           child: Container(

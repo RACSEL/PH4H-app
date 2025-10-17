@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:fhir/r4.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:ips_lacpass_app/api/api_manager.dart';
 import 'package:ips_lacpass_app/constants.dart';
@@ -25,7 +26,8 @@ class IPSLoader {
       Map<String, AllergyIntolerance> allergies,
       List<MedicationInfo> medications,
       Map<String, ImmunizationWithSource> immunizations,
-      Map<String, Procedure> procedures) async {
+      Map<String, Procedure> procedures,
+      Map<String, Organization> organizations) async {
     final Map<String, dynamic> ipsPayload = {
       'ips': ips,
       'conditions': conditions,
@@ -33,6 +35,7 @@ class IPSLoader {
       'medications': medications,
       'immunizations': immunizations,
       'procedures': procedures,
+      'organizations': organizations,
       'exp': DateTime.now()
           .add(Duration(days: Constants.ipsExpirationDays))
           .millisecondsSinceEpoch
@@ -60,7 +63,8 @@ class IPSLoader {
         Map<String, AllergyIntolerance>,
         List<MedicationInfo>,
         Map<String, ImmunizationWithSource>,
-        Map<String, Procedure>
+        Map<String, Procedure>,
+        Map<String, Organization>,
       )?> getStoredIps() async {
     try {
       final ipsStorage = await _secureStorage.read(key: 'ips');
@@ -71,6 +75,8 @@ class IPSLoader {
           final Map<String, dynamic> allergiesRaw = ipsPayload['allergies'];
           final List<dynamic> medicationsRaw = ipsPayload['medications'];
           final Map<String, dynamic> proceduresRaw = ipsPayload['procedures'];
+          final Map<String, dynamic> organizationsRaw =
+              ipsPayload['organizations'];
           final Map<String, dynamic> immunizationsRaw =
               ipsPayload['immunizations'];
 
@@ -87,6 +93,8 @@ class IPSLoader {
                 MapEntry(key, ImmunizationWithSource.fromJson(value))),
             proceduresRaw
                 .map((key, value) => MapEntry(key, Procedure.fromJson(value))),
+            organizationsRaw.map(
+                (key, value) => MapEntry(key, Organization.fromJson(value)))
           );
         } else {
           await _secureStorage.delete(key: 'ips');
@@ -94,7 +102,7 @@ class IPSLoader {
       }
       return null;
     } catch (e) {
-      print(e.toString());
+      debugPrint(e.toString());
       return null;
     }
   }
@@ -118,8 +126,8 @@ class IPSLoader {
   }
 
   Future<Map<String, dynamic>> fetchIPSWithVhlFromNationalNode(
-      String vhlCode) async {
-    final ipsData = await ApiManager.instance.getIpsVhl(vhlCode);
+      String vhlCode, String passcode) async {
+    final ipsData = await ApiManager.instance.getIpsVhl(vhlCode, passcode);
 
     return ipsData.data as Map<String, dynamic>;
   }

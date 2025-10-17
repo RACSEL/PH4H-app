@@ -23,8 +23,10 @@ class IPSUtils {
     var filteredCompositionSections = [];
     if (composition.isNotEmpty) {
       for (var section in composition['resource']['section']) {
-        if (List.of(section['entry']).isNotEmpty) {
-          section['entry'] = section['entry'].where((ref) => selectedUrls.contains(ref["reference"])).toList();
+        if (section['entry'] != null && List.of(section['entry']).isNotEmpty) {
+          section['entry'] = section['entry']
+              .where((ref) => selectedUrls.contains(ref["reference"]))
+              .toList();
           filteredCompositionSections.add(section);
         }
       }

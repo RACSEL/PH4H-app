@@ -1,8 +1,8 @@
-import 'package:dio/dio.dart';
 import 'package:fhir/r4.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ips_lacpass_app/api/api_manager.dart';
+import 'package:ips_lacpass_app/api/icvp_loader.dart';
 import 'package:ips_lacpass_app/api/ips_loader.dart';
 
 class MedicationInfo {
@@ -66,6 +66,7 @@ class IPSModel extends ChangeNotifier {
   List<MedicationInfo> medications = [];
   Map<String, ImmunizationWithSource> immunizations = {};
   Map<String, Procedure> procedures = {};
+  Map<String, Organization> organizations = {};
   Map<String, bool> originalImmunizations = {};
   String? vhl;
   Map<String, dynamic>? vhlPayload;
@@ -78,37 +79,44 @@ class IPSModel extends ChangeNotifier {
 
   Future<void> initState() async {
     _cleanState();
-    var ips = await IPSLoader.instance.getStoredIps();
-    if (ips != null) {
-      isInStorage = true;
-      bundle = ips.$1;
-      conditions = ips.$2;
-      allergies = ips.$3;
-      medications = ips.$4;
-      immunizations = ips.$5;
-      procedures = ips.$6;
-      originalImmunizations.clear();
-      for (var immunization in immunizations.values) {
-        originalImmunizations[immunization.immunization.vaccineCode.coding![0]
-            .code!.value!] = immunization.original;
+    try {
+      var ips = await IPSLoader.instance.getStoredIps();
+      if (ips != null) {
+        isInStorage = true;
+        bundle = ips.$1;
+        conditions = ips.$2;
+        allergies = ips.$3;
+        medications = ips.$4;
+        immunizations = ips.$5;
+        procedures = ips.$6;
+        organizations = ips.$7;
+        originalImmunizations.clear();
+
+        for (var immunization in immunizations.values) {
+          originalImmunizations[immunization.immunization.vaccineCode.coding![0]
+              .code!.value!] = immunization.original;
+        }
+      } else {
+        bundle = await IPSLoader.instance.fetchIPSFromNationalNode();
+        _parseBundle();
+        originalImmunizations.clear();
+        for (var immunization in immunizations.values) {
+          immunization.original = true;
+          originalImmunizations[immunization
+              .immunization.vaccineCode.coding![0].code!.value!] = true;
+        }
+        await IPSLoader.instance.storeIps(bundle!, conditions, allergies,
+            medications, immunizations, procedures, organizations);
+        isInStorage = true;
+        storeICVPs();
       }
-    } else {
-      bundle = await IPSLoader.instance.fetchIPSFromNationalNode();
-      _parseBundle();
-      originalImmunizations.clear();
-      for (var immunization in immunizations.values) {
-        immunization.original = true;
-        originalImmunizations[immunization
-            .immunization.vaccineCode.coding![0].code!.value!] = true;
-      }
-      await IPSLoader.instance.storeIps(bundle!, conditions, allergies,
-          medications, immunizations, procedures);
-      isInStorage = true;
+      notifyListeners();
+    } catch (error) {
+      rethrow;
     }
-    notifyListeners();
   }
 
-  Future<void> initStateWithVhlCode(String vhlCode) async {
+  Future<void> initStateWithVhlCode(String vhlCode, String passcode) async {
     throw Exception(
         "IpsModel cannot be initialized with VhlCode. Use initState instead.");
   }
@@ -119,6 +127,8 @@ class IPSModel extends ChangeNotifier {
     allergies.clear();
     medications.clear();
     immunizations.clear();
+    procedures.clear();
+    organizations.clear();
     isInStorage = false;
   }
 
@@ -145,6 +155,8 @@ class IPSModel extends ChangeNotifier {
                 MedicationStatement.fromJson(resource);
           } else if (resourceType == 'Procedure') {
             procedures[item["fullUrl"]] = Procedure.fromJson(resource);
+          } else if (resourceType == 'Organization') {
+            organizations[item["fullUrl"]] = Organization.fromJson(resource);
           } else if (resourceType == 'Immunization') {
             if (resource['patient'] == null) {
               resource['patient'] = {"reference": "Patient/unknown"};
@@ -198,16 +210,15 @@ class IPSModel extends ChangeNotifier {
     }
   }
 
-  Future<void> updateVhl(Map<String, dynamic>? filteredIPS) async {
+  Future<void> updateVhl(Map<String, dynamic>? filteredIPS, String passcode) async {
     try {
       if (filteredIPS != null) {
-        final response = await ApiManager.instance.getVHL(filteredIPS);
+        final response = await ApiManager.instance.getVHL(filteredIPS, passcode);
         vhl = response.data["data"];
         vhlPayload = response.data["payload"];
         notifyListeners();
       }
-    } on DioException catch (e) {
-      debugPrint('Error updating VHL: $e');
+    } catch (error) {
       rethrow;
     }
   }
@@ -224,6 +235,8 @@ class IPSModel extends ChangeNotifier {
     medications.clear();
     immunizations.clear();
     originalImmunizations.clear();
+    procedures.clear();
+    organizations.clear();
     await IPSLoader.instance.clearStoredIps();
     isInStorage = false;
   }
@@ -244,11 +257,31 @@ class IPSModel extends ChangeNotifier {
         }
       }
       await IPSLoader.instance.storeIps(bundle!, conditions, allergies,
-          medications, immunizations, procedures);
+          medications, immunizations, procedures, organizations);
       isInStorage = true;
+      storeICVPs();
       notifyListeners();
     } else {
       throw Exception("newIps cannot be null");
+    }
+  }
+
+  Future<void> storeICVPs() async {
+    final String bundleId = bundle!["id"];
+    try {
+      for (var ik in immunizations.keys) {
+        String immunizationId = ik.split(':')[2];
+        String id = '${bundle!["id"]}&$immunizationId';
+        final qrData = await ApiManager.instance
+            .vaccinationCertificate(bundleId, immunizationId);
+        if (qrData.data != null && qrData.data["data"] != "") {
+          await ICVPLoader.instance.storeICVP(id, qrData.data);
+        }
+      }
+      debugPrint("Successfully stored all IPSs ICVPs");
+    } on Exception catch (e) {
+      debugPrint(e.toString());
+      return;
     }
   }
 }
@@ -265,9 +298,10 @@ class IpsVhlModel extends IPSModel {
   }
 
   @override
-  Future<void> initStateWithVhlCode(String vhlCode) async {
+  Future<void> initStateWithVhlCode(String vhlCode, String passcode) async {
     _cleanState();
-    bundle = await IPSLoader.instance.fetchIPSWithVhlFromNationalNode(vhlCode);
+    bundle = await IPSLoader.instance
+        .fetchIPSWithVhlFromNationalNode(vhlCode, passcode);
     _parseBundle();
     notifyListeners();
   }

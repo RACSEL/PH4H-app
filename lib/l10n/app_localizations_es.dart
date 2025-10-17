@@ -112,6 +112,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get countryInputLabel => 'País';
 
   @override
+  String get countryLabel => 'País';
+
+  @override
   String get identifierInputLabel => 'Identificador';
 
   @override
@@ -311,6 +314,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get generateQrCodeButtonLabel => 'Generar código QR';
 
   @override
+  String get generate => 'Generar';
+
+  @override
   String get loginInvalidCredentials => 'Credenciales inválidas';
 
   @override
@@ -338,4 +344,60 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get addToWalletLabel => 'Agregar a Wallet';
+
+  @override
+  String get dateNotAvailable => 'Fecha no disponible';
+
+  @override
+  String get noDoseInformation => 'Sin información de dosis';
+
+  @override
+  String organizationsSectionTitle(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Servicios de Salud',
+      one: 'Servicio de Salud',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get labelAddress => 'Dirección';
+
+  @override
+  String get labelPhone => 'Teléfono';
+
+  @override
+  String get createPasscodeTitleLabel => 'Agregue un passcode';
+
+  @override
+  String get passcodeTitleLabel => 'Ingrese el passcode';
+
+  @override
+  String get passcodeInputLabel => 'Passcode';
+
+  @override
+  String get submitPasscode => 'Cargar VHL';
+
+  @override
+  String get regenerateICVP => 'Recrear QR ICVP';
+
+  @override
+  String get icvpListTitle => 'Vacunas escaneadas';
+
+  @override
+  String get issueDateLabel => 'Creación';
+
+  @override
+  String get expirationDateLabel => 'Expiración';
+
+  @override
+  String get noICVPFoundLabel => 'No se encontraron vacunas';
+
+  @override
+  String get icvpAddedLabel => 'Vacuna guardada';
+
+  @override
+  String get addNewICVPButtonLabel => 'Escanear nuevo ICVP';
 }

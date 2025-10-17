@@ -1,119 +1,133 @@
+import 'package:fhir/primitive_types/date_time.dart';
+import 'package:fhir/r4/basic_types/fhir_extension.dart';
+import 'package:fhir/r4/resource_types/base/entities1/entities1.dart';
+import 'package:fhir/r4/resource_types/clinical/summary/summary.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ips_lacpass_app/l10n/app_localizations.dart';
 import 'package:ips_lacpass_app/models/ips_model.dart';
+import 'package:ips_lacpass_app/widgets/organization_display.dart';
+import 'package:ips_lacpass_app/widgets/resource_card.dart';
+import 'package:intl/intl.dart';
 
 class ConditionsCard extends ConsumerWidget {
   final IpsSource source;
+  final List<MapEntry<String, Organization>> organizationList;
 
-  const ConditionsCard({super.key, required this.source});
+  const ConditionsCard(
+      {super.key, required this.source, required this.organizationList});
+
+  String _formatDate(BuildContext context, FhirDateTime? dateTime) {
+    if (dateTime == null) {
+      return '';
+    }
+
+    final DateTime date = dateTime.value;
+    return DateFormat.yMd(Localizations.localeOf(context).toString())
+        .format(date);
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    var conditionList;
+    List<MapEntry<String, Condition>> conditionList;
 
     switch (source) {
       case IpsSource.national:
-        conditionList =
-            ref.read(ipsModelProvider.select((ips) => ips.conditions)).entries;
+        conditionList = ref
+            .read(ipsModelProvider.select((ips) => ips.conditions))
+            .entries
+            .toList();
         break;
       case IpsSource.vhl:
         conditionList = ref
             .read(ipsVhlModelProvider.select((ips) => ips.conditions))
-            .entries;
+            .entries
+            .toList();
         break;
     }
 
-    return conditionList.length == 0
-        ? SizedBox.shrink()
-        : ExpansionTile(
-            initiallyExpanded: true,
-            title: Row(
-              children: [
-                Icon(
-                  MdiIcons.stethoscope,
-                  size: 28,
-                ),
-                SizedBox(
-                  width: 10,
-                ),
-                Text(AppLocalizations.of(context)!
-                    .conditionsSectionTitle(conditionList.length))
-              ],
-            ),
-            children: <Widget>[
-                Divider(
-                  height: 1,
-                ),
-                ...conditionList.toList().asMap().entries.map((entry) {
-                  final condition = entry.value.value;
-                  String dateString = '';
-                  if (condition.onsetDateTime != null) {
-                    String date =
-                        condition.onsetDateTime?.toIso8601String() ?? '';
-                    dateString =
-                        date.substring(0, 10).split('-').reversed.join('-');
-                  }
+    if (conditionList.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
-                  return Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 18, horizontal: 16),
-                      child: Column(
-                        children: [
-                          if (entry.key == 0)
-                            SizedBox()
-                          else ...[
-                            Divider(height: 1),
-                            SizedBox(height: 8),
-                          ],
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                condition.code?.coding?[0].display ?? '',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 2,
-                              ),
-                              Chip(
-                                  label: condition.clinicalStatus?.coding?[0].code.toString() ==
-                                          'active'
-                                      ? Text(
-                                          AppLocalizations.of(context)!
-                                              .conditionStatusActive,
-                                          style: TextStyle(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .onPrimary,
-                                              fontWeight: FontWeight.bold))
-                                      : Text(
-                                          AppLocalizations.of(context)!
-                                              .conditionStatusInactive,
-                                          style: TextStyle(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .onError,
-                                              fontWeight: FontWeight.bold)),
-                                  backgroundColor: condition
-                                              .clinicalStatus?.coding?[0].code
-                                              .toString() ==
-                                          'active'
-                                      ? Theme.of(context).colorScheme.primary
-                                      : Theme.of(context).colorScheme.error)
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(AppLocalizations.of(context)!
-                                  .conditionEncounterDiagnosis),
-                              Text(dateString)
-                            ],
-                          ),
-                        ],
-                      ));
-                })
-              ]);
+    final List<Widget> conditionItems = conditionList
+        .map((entry) => _buildConditionItem(
+              context,
+              entry.value,
+            ))
+        .toList();
+
+    return ResourceCard(
+      icon: MdiIcons.stethoscope,
+      title: AppLocalizations.of(context)!
+          .conditionsSectionTitle(conditionList.length),
+      items: conditionItems,
+    );
+  }
+
+  Widget _buildConditionItem(BuildContext context, Condition condition) {
+    final String? statusCode =
+        condition.clinicalStatus?.coding?.first.code?.toString();
+
+    final bool isActive = statusCode == 'active';
+
+    final String dateString = _formatDate(context, condition.onsetDateTime);
+
+    final List<FhirExtension>? conditionExtensions = condition.extension_;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            spacing: 4,
+            children: [
+              Flexible(
+                child: Text(
+                  condition.code?.coding?.first.display ??
+                      condition.code?.text ??
+                      '',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
+                ),
+              ),
+              Chip(
+                padding: EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                label: Text(
+                  isActive
+                      ? AppLocalizations.of(context)!.conditionStatusActive
+                      : AppLocalizations.of(context)!.conditionStatusInactive,
+                  style: TextStyle(
+                      color: isActive
+                          ? Theme.of(context).colorScheme.onPrimary
+                          : Theme.of(context).colorScheme.onError,
+                      fontWeight: FontWeight.bold),
+                ),
+                backgroundColor: isActive
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.error,
+              )
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(AppLocalizations.of(context)!.conditionEncounterDiagnosis),
+              Text(dateString, style: Theme.of(context).textTheme.bodyMedium),
+            ],
+          ),
+          if (conditionExtensions != null)
+            OrganizationDisplay(
+              extensions: conditionExtensions,
+              organizationList: organizationList,
+            ),
+        ],
+      ),
+    );
   }
 }

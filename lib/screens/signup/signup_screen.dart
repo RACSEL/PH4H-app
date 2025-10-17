@@ -1,12 +1,17 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ips_lacpass_app/l10n/locale_provider.dart';
 import 'package:ips_lacpass_app/models/auth_state_notifier.dart';
+import 'package:ips_lacpass_app/utils/error_utils.dart';
+import 'package:ips_lacpass_app/widgets/filled_button.dart';
+import 'package:ips_lacpass_app/widgets/password_form_field.dart';
 
 import 'package:ips_lacpass_app/widgets/patient_form/document_type_select.dart';
 import 'package:ips_lacpass_app/l10n/app_localizations.dart';
 import 'package:ips_lacpass_app/constants.dart';
 import 'package:ips_lacpass_app/widgets/patient_form/national_id_input.dart';
+import 'package:ips_lacpass_app/widgets/snackbar.dart';
 
 part 'signup_controller.dart';
 
@@ -115,8 +120,6 @@ class _SignupScreen extends SignupController {
                           decoration: InputDecoration(
                             labelText: AppLocalizations.of(context)!
                                 .firstNameInputLabel,
-                            hintText: AppLocalizations.of(context)!
-                                .firstNameInputLabel,
                             border: OutlineInputBorder(),
                           ),
                           onChanged: (newValue) {
@@ -136,8 +139,6 @@ class _SignupScreen extends SignupController {
                           enableSuggestions: false,
                           decoration: InputDecoration(
                             labelText: AppLocalizations.of(context)!
-                                .lastNameInputLabel,
-                            hintText: AppLocalizations.of(context)!
                                 .lastNameInputLabel,
                             border: OutlineInputBorder(),
                           ),
@@ -160,8 +161,6 @@ class _SignupScreen extends SignupController {
                           decoration: InputDecoration(
                             labelText:
                                 AppLocalizations.of(context)!.emailInputLabel,
-                            hintText:
-                                AppLocalizations.of(context)!.emailInputLabel,
                             border: OutlineInputBorder(),
                           ),
                           onChanged: (newValue) {
@@ -172,52 +171,30 @@ class _SignupScreen extends SignupController {
                           validator: _inputEmailValidator,
                         ),
                         SizedBox(height: 23),
-                        TextFormField(
-                          focusNode: _getFocusNode('password'),
-                          onTap: () => _scrollToField('password'),
-                          onTapOutside: (PointerDownEvent event) {
-                            FocusManager.instance.primaryFocus?.unfocus();
-                          },
-                          obscureText: true,
-                          enableSuggestions: false,
-                          autocorrect: false,
-                          decoration: InputDecoration(
-                            labelText: AppLocalizations.of(context)!
-                                .passwordInputLabel,
-                            hintText: AppLocalizations.of(context)!
-                                .passwordInputLabel,
-                            border: OutlineInputBorder(),
-                          ),
+                        PasswordFormField(
+                          inputLabel:
+                              AppLocalizations.of(context)!.passwordInputLabel,
+                          passwordValidator: _passwordValidator,
                           onChanged: (newValue) {
                             setState(() {
                               _inputPassword = newValue;
                             });
                           },
-                          validator: _passwordValidator,
+                          onTap: () => _scrollToField('password'),
+                          focusNode: _getFocusNode('password'),
                         ),
                         SizedBox(height: 23),
-                        TextFormField(
-                          focusNode: _getFocusNode('repeatPassword'),
-                          onTap: () => _scrollToField('repeatPassword'),
-                          onTapOutside: (PointerDownEvent event) {
-                            FocusManager.instance.primaryFocus?.unfocus();
-                          },
-                          obscureText: true,
-                          enableSuggestions: false,
-                          autocorrect: false,
-                          decoration: InputDecoration(
-                            labelText: AppLocalizations.of(context)!
-                                .repeatPasswordInputLabel,
-                            hintText: AppLocalizations.of(context)!
-                                .repeatPasswordInputLabel,
-                            border: OutlineInputBorder(),
-                          ),
+                        PasswordFormField(
+                          inputLabel: AppLocalizations.of(context)!
+                              .repeatPasswordInputLabel,
+                          passwordValidator: _repeatPasswordValidator,
                           onChanged: (newValue) {
                             setState(() {
                               _inputRepeatPassword = newValue;
                             });
                           },
-                          validator: _repeatPasswordValidator,
+                          onTap: () => _scrollToField('repeatPassword'),
+                          focusNode: _getFocusNode('repeatPassword'),
                         ),
                         SizedBox(height: 15),
                         FormField<bool>(
@@ -225,6 +202,8 @@ class _SignupScreen extends SignupController {
                               return Column(
                                 children: <Widget>[
                                   Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
                                     children: <Widget>[
                                       Checkbox(
                                           value: _acceptTerms,
@@ -234,8 +213,14 @@ class _SignupScreen extends SignupController {
                                               state.didChange(value);
                                             });
                                           }),
-                                      Text(AppLocalizations.of(context)!
-                                          .acceptTermsAndConditionsLabel),
+                                      Flexible(
+                                        child: Text(
+                                          AppLocalizations.of(context)!
+                                              .acceptTermsAndConditionsLabel,
+                                          softWrap: true,
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
                                     ],
                                   ),
                                   Text(
@@ -273,20 +258,15 @@ class _SignupScreen extends SignupController {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  FilledButton(
-                    onPressed: _submitting ||
-                            !_userInteractsWithAllFields() ||
-                            _formKey.currentState == null ||
-                            !_formKey.currentState!.validate()
-                        ? null
-                        : _submitForm,
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 10),
-                      child: Text(
+                  Ph4hFilledButton(
+                      submitting: _submitting,
+                      buttonLabel:
                           AppLocalizations.of(context)!.registerButtonLabel,
-                          style: TextStyle(fontSize: 18)),
-                    ),
-                  ),
+                      isDisabled: _submitting ||
+                          !_userInteractsWithAllFields() ||
+                          _formKey.currentState == null ||
+                          !_formKey.currentState!.validate(),
+                      onPressed: _submitForm),
                   const SizedBox(height: 10),
                   OutlinedButton(
                     onPressed: () {

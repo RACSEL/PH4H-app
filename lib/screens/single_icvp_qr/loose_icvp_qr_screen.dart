@@ -1,43 +1,40 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:ips_lacpass_app/api/api_manager.dart';
 import 'package:ips_lacpass_app/api/icvp_loader.dart';
 import 'package:ips_lacpass_app/constants.dart';
 import 'package:ips_lacpass_app/l10n/app_localizations.dart';
 import 'package:ips_lacpass_app/models/credential_type.dart';
-import 'package:ips_lacpass_app/utils/error_utils.dart';
-import 'package:ips_lacpass_app/widgets/filled_button.dart';
 import 'package:ips_lacpass_app/widgets/patient_appbar/patient_appbar_widget.dart';
 import 'package:ips_lacpass_app/widgets/snackbar.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-part 'icvp_qr_controller.dart';
+part 'loose_icvp_qr_controller.dart';
 
-class ICVPQRScreenArguments {
-  final String bundleId;
-  final String? immunizationId;
+// "Loose" ICVP means an ICVP that is not linked to the user's IPS.
+class LooseICVPQRScreenArguments {
+  final String icvpData; //We use the icvp QR Data as the ID in the storage
 
-  const ICVPQRScreenArguments({required this.bundleId, this.immunizationId});
+  const LooseICVPQRScreenArguments({required this.icvpData});
 }
 
-class ICVPQRScreen extends StatefulWidget {
+class LooseICVPQRScreen extends StatefulWidget {
   final bool loading = true;
 
-  const ICVPQRScreen({super.key});
+  const LooseICVPQRScreen({super.key});
 
   @override
-  State<StatefulWidget> createState() => _ICVPScreen();
+  State<StatefulWidget> createState() => _LooseICVPScreen();
 }
 
-class _ICVPScreen extends ICVPQRController {
+class _LooseICVPScreen extends LooseICVPQRController {
   @override
   Widget build(BuildContext context) {
     final args =
-        ModalRoute.of(context)!.settings.arguments as ICVPQRScreenArguments;
+        ModalRoute.of(context)!.settings.arguments as LooseICVPQRScreenArguments;
 
     if (icvpQrContent == null) {
-      getICVP(args.bundleId, args.immunizationId);
+      getICVP(args.icvpData);
     }
 
     return Scaffold(
@@ -85,30 +82,13 @@ class _ICVPScreen extends ICVPQRController {
                           version: QrVersions.auto,
                         ),
                         const SizedBox(height: 8),
-                        Center(
-                          child: SizedBox(
-                            width: 230,
-                            child: Ph4hFilledButton(
-                              submitting: isRecreatingICVP,
-                              buttonLabel:
-                                  AppLocalizations.of(context)!.regenerateICVP,
-                              isDisabled: isRecreatingICVP,
-                              onPressed: () {
-                                getICVP(args.bundleId, args.immunizationId,
-                                    reload: true);
-                              },
-                              hasPrefixIcon: true,
-                              prefixIcon: Icon(Icons.refresh, size: 24),
-                            ),
-                          ),
-                        ),
                         if (Constants.showWallet) ...[
                           const SizedBox(height: 8),
                           Center(
                             child: SizedBox(
                               width: 230,
                               child: FilledButton(
-                                onPressed: isLoading || isRecreatingICVP
+                                onPressed: isLoading
                                     ? null
                                     : getWalletLink,
                                 child: isLoading
@@ -155,8 +135,7 @@ class _ICVPScreen extends ICVPQRController {
                           OutlinedButton(
                             onPressed: () {
                               icvpQrContent = null;
-                              Navigator.popUntil(
-                                  context, ModalRoute.withName("/ips"));
+                              Navigator.popUntil(context, ModalRoute.withName("/ips"));
                             },
                             child: Padding(
                               padding: EdgeInsets.symmetric(vertical: 10),

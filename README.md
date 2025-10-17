@@ -56,6 +56,14 @@ KEYCLOAK_CLIENT_ID=''
 # Refresh token key, on keycloak is refresh_token
 KEYCLOAK_REFRESH_TOKEN_KEY=''
 
+# General
+# Allow to use any url from backend side. This is mainly used when you do not have any domain setup.
+# Enable it by changing the value to 1
+USE_HTTP=0
+# It will enable to check all requests going to the backend.
+# Enable it by changing the value to 1
+DEBUG_MODE=0
+
 # IPS
 # The number of days the user's IPS bundle will be stored in the device storage after fetching it from
 # the FHIR server
@@ -64,8 +72,6 @@ IPS_EXP_DAYS=6
 # VHL
 # The number of days the generated QR code will expire
 VHL_EXPIRATION_DAYS=14
-# In case you want to add a passcode to the generated QR code
-VHL_PASS_CODE='0000'
 
 # Wallet
 # Disabled by default, change value to "1" to enable wallet

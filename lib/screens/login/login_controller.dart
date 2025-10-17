@@ -64,6 +64,7 @@ abstract class LoginController extends ConsumerState<LoginScreen> {
               context,
               AppLocalizations.of(context)!.loginInvalidCredentials,
             );
+            return;
           }
         } else if (err.response?.statusCode == 400 &&
             err.response?.data['error_description'] ==
@@ -73,8 +74,21 @@ abstract class LoginController extends ConsumerState<LoginScreen> {
               context,
               AppLocalizations.of(context)!.loginVerifyEmail,
             );
+            return;
+          }
+        } else {
+          if (mounted) {
+            showUnexpectedError(context, err);
+            return;
           }
         }
+      }
+
+      if (mounted) {
+        showTopSnackBar(
+          context,
+          AppLocalizations.of(context)!.unexpectedErrorMessage,
+        );
       }
     });
   }

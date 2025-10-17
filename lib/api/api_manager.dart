@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:ips_lacpass_app/api/auth/auth_interceptor.dart';
 import 'package:ips_lacpass_app/constants.dart';
@@ -17,6 +20,31 @@ class ApiManager {
 
   ApiManager._internal() {
     dio.interceptors.add(AuthInterceptor(dio));
+
+    if (Constants.debugMode) {
+      dio.interceptors.add(LogInterceptor(
+        request: true,
+        requestBody: true,
+        responseBody: true,
+        error: true,
+      ));
+    }
+
+    if ((Platform.isAndroid || Platform.isIOS) && Constants.useHttp) {
+      (dio.httpClientAdapter as IOHttpClientAdapter).onHttpClientCreate =
+          (client) {
+        var allowedHosts = {
+          Constants.apiEndpoint.split('//')[1],
+          Constants.keycloakEndpoint.split('//')[1]
+        };
+
+        client.badCertificateCallback =
+            (X509Certificate cert, String host, int port) {
+          return allowedHosts.contains(host);
+        };
+        return client;
+      };
+    }
   }
 
   static ApiManager get instance {
@@ -121,7 +149,7 @@ class ApiManager {
       );
       return response;
     } catch (e) {
-      debugPrint(e.toString());
+      // debugPrint(e.toString());
       rethrow;
     }
   }
@@ -148,7 +176,7 @@ class ApiManager {
     }
   }
 
-  Future<Response> getVHL(Map<String, dynamic> bundle) async {
+  Future<Response> getVHL(Map<String, dynamic> bundle, String passcode) async {
     try {
       final Response response = await dio.post('${Constants.apiEndpoint}/qr',
           options: Options(headers: {
@@ -159,23 +187,25 @@ class ApiManager {
             "expires_on": DateTime.now()
                 .add(Duration(days: Constants.vhlExpirationDays))
                 .toIso8601String(),
-            "pass_code": Constants.vhlPassCode
+            "pass_code": passcode
           });
       return response;
-    } on DioException catch (e) {
-      debugPrint(e.toString());
+    } catch (error) {
       rethrow;
     }
   }
 
-  Future<Response> getIpsVhl(String vhlCode) async {
+  Future<Response> getIpsVhl(String vhlCode, String passcode) async {
     try {
-      final Response response =
-          await dio.post('${Constants.apiEndpoint}/qr/fetch',
-              options: Options(headers: {
-                'Content-Type': 'application/json',
-              }),
-              data: {"data": vhlCode, "pass_code": Constants.vhlPassCode});
+      final Response response = await dio.post(
+          '${Constants.apiEndpoint}/qr/fetch',
+          options: Options(headers: {
+            'Content-Type': 'application/json',
+          }),
+          data: {
+            "data": vhlCode,
+            "pass_code": passcode
+          });
       return response;
     } on DioException catch (e) {
       debugPrint(e.toString());
@@ -230,6 +260,21 @@ class ApiManager {
         ),
         data: {"claims": payload, "credentialType": type.value},
       );
+      return response;
+    } on DioException catch (e) {
+      debugPrint(e.toString());
+      rethrow;
+    }
+  }
+
+  Future<Response> validateICVP(String qrData) async {
+    try {
+      final Response response =
+          await dio.post('${Constants.apiEndpoint}/qr/validate',
+              options: Options(headers: {
+                'Content-Type': 'application/json',
+              }),
+              data: {"data": qrData});
       return response;
     } on DioException catch (e) {
       debugPrint(e.toString());

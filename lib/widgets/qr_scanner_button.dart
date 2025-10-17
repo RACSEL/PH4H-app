@@ -14,11 +14,11 @@ class QRScannerButton extends ConsumerWidget {
         onPressed: ipsNotLoaded
             ? null
             : () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => CameraScannerScreen(),
-                    ));
+          Navigator.pushNamed(
+              context,
+              "/scan-qr",
+              arguments: CameraScannerScreenArguments(fromVHL: true)
+          );
               },
         child: Text(AppLocalizations.of(context)!.scanQRCodeButtonLabel));
   }
