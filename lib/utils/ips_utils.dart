@@ -19,6 +19,10 @@ class IPSUtils {
       if (entry['resource']['resourceType'] == 'Composition') {
         composition = entry;
       }
+      if (entry['resource']['resourceType'] == 'Patient') {
+        filteredBundle['entry'].add(entry);
+        selectedUrls.add(entry['fullUrl']);
+      }
     }
     var filteredCompositionSections = [];
     if (composition.isNotEmpty) {
@@ -31,6 +35,8 @@ class IPSUtils {
         }
       }
       composition['resource']['section'] = filteredCompositionSections;
+
+
       filteredBundle['entry'].add(composition);
     }
     return filteredBundle;
